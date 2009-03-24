@@ -2,7 +2,7 @@
 # -*- mode: makefile; coding: utf-8 -*-
 
 # Common include files
-include /usr/share/cdbs/1/rules/patchsys-quilt.mk
+#include /usr/share/cdbs/1/rules/patchsys-quilt.mk
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/makefile.mk
 
@@ -42,47 +42,7 @@ po:
 ## Squashfs-modules packages
 STAMP_CONFIG = $(CURDIR)/debian/stamp-configure
 
-# Version of the Linux Kernel
-DIR_MOD  = linux-2.6
-SNAME    = squashfs
-PSOURCE  = $(SNAME)-source
-MNAME    = $(SNAME)-modules
-
-pre-build::
-	# Create the 'linux-2.6' directory using last patch of squashfs, it is
-	# needed for out-of-tree compilation
-	if ! test -f $(STAMP_CONFIG); then \
-	  mkdir -p $(DIR_MOD); \
-	  patch -d $(DIR_MOD) -Np1 -f -i ../kernel-patches/linux-2.6.24/squashfs3.3-patch; \
-	  mv $(DIR_MOD)/fs/squashfs/* $(DIR_MOD); \
-	  mv $(DIR_MOD)/include/linux/* $(DIR_MOD); \
-	  rm -rf $(DIR_MOD)/fs $(DIR_MOD)/include; \
-	  touch $(STAMP_CONFIG); \
-	fi 
-
-# For creating correctly the 'squashfs-source' package which will be
-# used for building module package with custom kernel
-install/squashfs-source::
-	# Create the needed directories
-	mkdir -p debian/modules/$(SNAME)/debian \
-		 debian/$(PSOURCE)/usr/src
-
-	# Copy the source and header files
-	cp $(DIR_MOD)/*.h $(DIR_MOD)/*.c $(DIR_MOD)/Makefile \
-		debian/modules/$(SNAME)
-
-	# Copy the debian specific files
-	cp debian/changelog debian/compat debian/copyright debian/*.modules.in \
-		debian/modules/$(SNAME)/debian
-
-	# This rules file is specific to m-a
-	install -m755 debian/rules.modules \
-		debian/modules/$(SNAME)/debian/rules
-
-	# Finally create the tarball which contains the modules directory
-	cd debian && tar jcf $(PSOURCE)/usr/src/$(SNAME).tar.bz2 modules
-
 # Common targets
 clean::
-	rm -rf $(DOC_DIR)/fr $(DOC_DIR)/*.8 $(DOC_DIR)/*.1 $(DOC_DIR)/en/*.8 $(DIR_MOD) debian/modules
+	rm -rf $(DOC_DIR)/fr $(DOC_DIR)/*.8 $(DOC_DIR)/*.1 $(DOC_DIR)/en/*.8 $(DIR_MOD)
 	rm -f $(DEB_STOOLS)/*.o $(DEB_STOOLS)/mksquashfs $(DEB_STOOLS)/unsquashfs $(STAMP_CONFIG)
