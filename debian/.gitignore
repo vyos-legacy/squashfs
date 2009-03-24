@@ -1,0 +1,7 @@
+*.log
+*.debhelper
+squashfs-tools/
+files
+stamp-makefile-build
+*.substvars
+doc/
