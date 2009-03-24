@@ -1,8 +1,0 @@
-00-cvs-fix-segv-and-mksquashfs-hang.patch
-00-cvs-fix-dangling-symbolic-links.patch
-00-cvs-fix-progress-bar-for-hardlinked-files.patch
-01-kernel-compat.patch
-01-kernel-fix-includes.patch
-01-kernel-fix-makefile.patch
-01-kernel-fix-missing-include.patch
-01-kernel-2.6.25-api.patch
