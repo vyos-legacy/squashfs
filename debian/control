@@ -1,0 +1,62 @@
+Source: squashfs
+Section: admin
+Priority: optional
+Maintainer: Daniel Baumann <daniel@debian.org>
+Uploaders: Roland Stigge <stigge@antcom.de>, Otavio Salvador <otavio@debian.org>
+Build-Depends: cdbs (>= 0.4.23-1.1),
+               quilt,
+               patchutils (>= 0.2.25),
+               debhelper (>= 5),
+               zlib1g-dev,
+               po4a (>= 0.21),
+               xsltproc,
+               docbook-xsl,
+               bzip2,
+               binutils-hppa64 [hppa],
+               gcc-4.2-hppa64 [hppa],
+               docbook-xml,
+               zlib1g-dev
+Standards-Version: 3.7.3
+Vcs-Git: git://git.debian.org/git/collab-maint/squashfs.git
+Vcs-Browser: http://git.debian.org/?p=collab-maint/squashfs.git
+Homepage: http://squashfs.sourceforge.net/
+
+Package: squashfs-tools
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: squashfs-source
+Description: Tool to create and append to squashfs filesystems
+ Squashfs is a highly compressed read-only filesystem for Linux. It uses zlib
+ compression to compress both files, inodes and directories. Inodes in the
+ system are very small and all blocks are packed to minimise data overhead.
+ Block sizes greater than 4K are supported up to a maximum of 64K.
+ .
+ Squashfs is intended for general read-only filesystem use, for archival
+ use (i.e. in cases where a .tar.gz file may be used), and in constrained
+ block device/memory systems (e.g. embedded systems) where low overhead is
+ needed.
+
+Package: squashfs-source
+Architecture: all
+Depends: module-assistant,
+	 debhelper (>= 5),
+	 make,
+	 bzip2,
+	 zlib1g-dev
+Recommends: squashfs-tools
+Conflicts: kernel-patch-squashfs
+Replaces: kernel-patch-squashfs
+Description: Source for the squash filesystem
+ Squashfs is a highly compressed read-only filesystem for Linux. It uses zlib
+ compression to compress both files, inodes and directories. Inodes in the
+ system are very small and all blocks are packed to minimise data overhead.
+ Block sizes greater than 4K are supported up to a maximum of 64K.
+ .
+ Squashfs is intended for general read-only filesystem use, for archival
+ use (i.e. in cases where a .tar.gz file may be used), and in constrained
+ block device/memory systems (e.g. embedded systems) where low overhead is
+ needed.
+ .
+ This package provides the source code for the squashfs kernel modules.
+ The squashfs-tools package is also required in order to make use of these
+ modules. Kernel source or headers are required to compile these modules.
