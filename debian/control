@@ -3,16 +3,12 @@ Section: admin
 Priority: optional
 Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
 Build-Depends: cdbs (>= 0.4.23-1.1),
-               quilt,
-               patchutils (>= 0.2.25),
                debhelper (>= 5),
                zlib1g-dev,
                po4a (>= 0.21),
                xsltproc,
                docbook-xsl,
                bzip2,
-               binutils-hppa64 [hppa],
-               gcc-4.2-hppa64 [hppa],
                docbook-xml,
                zlib1g-dev
 Standards-Version: 3.7.3
