@@ -1,3 +1,10 @@
+squashfs (4.0+vyatta-2) unstable; urgency=low
+
+  [ Stephen Hemminger ]
+  * Don't need patch/quilt anymore
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Thu, 02 Apr 2009 10:42:47 -0700
+
 squashfs (4.0+vyatta-1) unstable; urgency=low
 
   * Initial Vyatta release  from squashfs CVS 4.0 base
