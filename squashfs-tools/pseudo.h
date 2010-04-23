@@ -1,8 +1,5 @@
-#ifndef SORT_H 
-#define SORT_H
-
 /*
- * Squashfs
+ * Create a squashfs filesystem.  This is a highly compressed read only filesystem.
  *
  * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
  * Phillip Lougher <phillip@lougher.demon.co.uk>
@@ -21,42 +18,31 @@
  * along with this program; if not, write to the Free Software
  * Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * sort.h
+ * pseudo.h
  */
-
-struct dir_info {
-	char			*pathname;
-	unsigned int		count;
-	unsigned int		directory_count;
-	unsigned int		current_count;
-	unsigned int		byte_count;
-	char			dir_is_ldir;
-	struct dir_ent		*dir_ent;
-	struct dir_ent		**list;
-	DIR			*linuxdir;
+struct pseudo_dev {
+	char		type;
+	unsigned int	mode;
+	unsigned int	uid;
+	unsigned int	gid;
+	unsigned int	major;
+	unsigned int	minor;
 };
 
-struct dir_ent {
+struct pseudo_entry {
 	char			*name;
 	char			*pathname;
-	struct inode_info	*inode;
-	struct dir_info		*dir;
-	struct dir_info		*our_dir;
-	struct old_root_entry_info *data;
+	struct pseudo		*pseudo;
+	struct pseudo_dev	*dev;
+};
+	
+struct pseudo {
+	int			names;
+	int			count;
+	struct pseudo_entry	*name;
 };
 
-struct inode_info {
-	unsigned int		nlink;
-	struct stat		buf;
-	squashfs_inode		inode;
-	unsigned int		type;
-	unsigned int		inode_number;
-	char			read;
-	struct inode_info	*next;
-};
-
-struct priority_entry {
-	struct dir_ent *dir;
-	struct priority_entry *next;
-};
-#endif
+extern int read_pseudo_def(struct pseudo **, char *);
+extern int read_pseudo_file(struct pseudo **, char *);
+extern struct pseudo *pseudo_subdir(char *, struct pseudo *);
+extern struct pseudo_entry *pseudo_readdir(struct pseudo *);
