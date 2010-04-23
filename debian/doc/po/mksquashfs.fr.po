@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: squashfs\n"
-"POT-Creation-Date: 2008-04-05 09:29-0300\n"
+"POT-Creation-Date: 2010-04-23 11:41-0600\n"
 "PO-Revision-Date: 2007-08-08 17:23+0100\n"
 "Last-Translator: Arnaud Fontaine <arnau@debian.org>\n"
 "Language-Team: \n"
@@ -13,96 +13,119 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 # type: Content of the dhfirstname entity
+#. type: Content of the dhfirstname entity
 #: ../en/mksquashfs.dbk:30
 msgid "<firstname>Frédéric</firstname>"
 msgstr "<firstname>Frédéric</firstname>"
 
 # type: Content of the dhsurname entity
+#. type: Content of the dhsurname entity
 #: ../en/mksquashfs.dbk:31
 msgid "<surname>Boiteux</surname>"
 msgstr "<surname>Boiteux</surname>"
 
 # type: Content of the dhdate entity
+#. type: Content of the dhdate entity
 #: ../en/mksquashfs.dbk:34
 msgid "<date>december 20, 2004</date>"
 msgstr "<date>december 20, 2004</date>"
 
 # type: Content of the dhsection entity
+#. type: Content of the dhsection entity
 #: ../en/mksquashfs.dbk:38
 msgid "<manvolnum>1</manvolnum>"
 msgstr "<manvolnum>1</manvolnum>"
 
 # type: Content of the dhemail entity
+#. type: Content of the dhemail entity
 #: ../en/mksquashfs.dbk:39
 msgid "<email>fboiteux@calistel.com</email>"
 msgstr "<email>fboiteux@calistel.com</email>"
 
 # type: Content of the dhusername entity
+#. type: Content of the dhusername entity
 #: ../en/mksquashfs.dbk:40
 msgid "Frédéric Boiteux"
 msgstr "Frédéric Boiteux"
 
 # type: Content of the dhucpackage entity
+#. type: Content of the dhucpackage entity
 #: ../en/mksquashfs.dbk:41
 msgid "<refentrytitle>MKSQUASHFS</refentrytitle>"
 msgstr "<refentrytitle>MKSQUASHFS</refentrytitle>"
 
 # type: Content of the dhpackage entity
+#. type: Content of the dhpackage entity
 #: ../en/mksquashfs.dbk:42
 msgid "mksquashfs"
 msgstr "mksquashfs"
 
 # type: Content of the debian entity
+#. type: Content of the debian entity
 #: ../en/mksquashfs.dbk:44
 msgid "<productname>Debian</productname>"
 msgstr "<productname>Debian</productname>"
 
 # type: Content of the gnu entity
+#. type: Content of the gnu entity
 #: ../en/mksquashfs.dbk:45
 msgid "<acronym>GNU</acronym>"
 msgstr "<acronym>GNU</acronym>"
 
 # type: Content of the gpl entity
+#. type: Content of the gpl entity
 #: ../en/mksquashfs.dbk:46
 msgid "&gnu; <acronym>GPL</acronym>"
 msgstr "&gnu; <acronym>GPL</acronym>"
 
 # type: Attribute 'lang' of: <refentry>
+#. type: Attribute 'lang' of: <refentry>
 #: ../en/mksquashfs.dbk:50
 msgid "fr"
 msgstr "fr"
 
-# type: Content of: <refentry><refentryinfo><address>
-#: ../en/mksquashfs.dbk:52
+#. type: Content of: <refentry><refentryinfo><address>
+#: ../en/mksquashfs.dbk:53
 #, no-wrap
 msgid ""
-"\n"
 "      &dhemail;\n"
 "    "
 msgstr ""
 
-# type: Content of: <refentry><refentryinfo><copyright><holder>
-#: ../en/mksquashfs.dbk:61
-msgid "&dhusername;"
-msgstr "&dhusername;"
+#.  <author>
+#.  
+#.        &dhfirstname; 
+#.        &dhsurname; 
+#.      </author>
+#.  
+#. type: Content of: <refentry><refentryinfo>
+#: ../en/mksquashfs.dbk:52
+msgid ""
+"<placeholder type=\"address\" id=\"0\"/> <copyright> <year>2005</year> "
+"<holder>&dhusername;</holder> </copyright> &dhdate;"
+msgstr ""
 
 # type: Content of: <refentry><refnamediv><refname>
+#. type: Content of: <refentry><refnamediv><refname>
 #: ../en/mksquashfs.dbk:75
 msgid "&dhpackage;"
 msgstr "&dhpackage;"
 
 # type: Content of: <refentry><refnamediv><refpurpose>
+#. type: Content of: <refentry><refnamediv><refpurpose>
 #: ../en/mksquashfs.dbk:77
 msgid "Create or modify a Squash file system"
 msgstr ""
 "Crée ou modifie un système de fichiers compressé <literal>Squash</literal>"
 
 # type: Content of: <refentry><refsynopsisdiv><cmdsynopsis>
+#. type: Content of: <refentry><refsynopsisdiv><cmdsynopsis>
 #: ../en/mksquashfs.dbk:83
 msgid "<command>&dhpackage;</command> <arg><option>-version</option></arg>"
 msgstr "<command>&dhpackage;</command> <arg><option>-version</option></arg>"
 
 # type: Content of: <refentry><refsynopsisdiv><cmdsynopsis>
+#. type: Content of: <refentry><refsynopsisdiv><cmdsynopsis>
 #: ../en/mksquashfs.dbk:88
 msgid ""
 "<command>&dhpackage;</command> <arg choice=\"plain\" rep=\"repeat"
@@ -120,11 +143,13 @@ msgstr ""
 "option></arg>"
 
 # type: Content of: <refentry><refsect1><title>
+#. type: Content of: <refentry><refsect1><title>
 #: ../en/mksquashfs.dbk:101
 msgid "DESCRIPTION"
 msgstr "DESCRIPTION"
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:103
 msgid ""
 "A squashfs is a compressed read-only file system. Use the "
@@ -137,6 +162,7 @@ msgstr ""
 "système existant."
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:108
 msgid ""
 "If a single source directory is specified (i.e. <userinput>mksquashfs "
@@ -150,6 +176,7 @@ msgstr ""
 "répertoire source."
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:115
 msgid ""
 "If multiple source directories or files are specified, <command>&dhpackage;</"
@@ -169,6 +196,7 @@ msgstr ""
 "replaceable>_2, etc."
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:125
 msgid ""
 "The <replaceable>dest</replaceable> argument can either be a conventional "
@@ -185,6 +213,7 @@ msgstr ""
 "<option>-noappend</option> est précisée."
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:133
 msgid ""
 "There are a large number of options that can be used to control the "
@@ -197,6 +226,7 @@ msgstr ""
 "de loin les optimales et ne devraient être modifiées qu'exceptionnellement !"
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:138
 msgid ""
 "The <option>-noI</option>, <option>-noD</option> and <option>-noF</option> "
@@ -215,6 +245,7 @@ msgstr ""
 "obtient un système de fichiers non comprimé."
 
 # type: Content of: <refentry><refsect1><para>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:148
 msgid ""
 "By default files in the generated filesystem inherit the UID and GID "
@@ -227,6 +258,7 @@ msgstr ""
 "comportement :"
 
 # type: Content of: <refentry><refsect1><para><itemizedlist><listitem><simpara>
+#. type: Content of: <refentry><refsect1><itemizedlist><listitem><para>
 #: ../en/mksquashfs.dbk:157
 msgid ""
 "The options <option>-all-root</option> and <option>-root-owned</option> "
@@ -241,6 +273,7 @@ msgstr ""
 "sans avoir un accès à ce compte sur la machine où on le construit."
 
 # type: Content of: <refentry><refsect1><para><itemizedlist><listitem><simpara>
+#. type: Content of: <refentry><refsect1><itemizedlist><listitem><para>
 #: ../en/mksquashfs.dbk:164
 msgid ""
 "The <option>-force-uid <replaceable>uid</replaceable></option> option forces "
@@ -255,6 +288,7 @@ msgstr ""
 "soit un nombre."
 
 # type: Content of: <refentry><refsect1><para><itemizedlist><listitem><simpara>
+#. type: Content of: <refentry><refsect1><itemizedlist><listitem><para>
 #: ../en/mksquashfs.dbk:172
 msgid ""
 "The <option>-force-gid <replaceable>gid</replaceable></option> option forces "
@@ -268,6 +302,7 @@ msgstr ""
 "peut être soit un nom (par exemple <literal>root</literal>), soit un nombre."
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:181
 msgid ""
 "The <option>-e</option> and <option>-ef</option> options allow files/"
@@ -301,6 +336,7 @@ msgstr ""
 "filename> et <filename>source2/out/ex3</filename>."
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:201
 msgid ""
 "The <option>-e</option> and <option>-ef</option> exclude options are "
@@ -315,6 +351,7 @@ msgstr ""
 "<userinput>mksquashfs / /tmp/root.sqsh -e proc /tmp/root.sqsh</userinput>"
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:208
 msgid ""
 "Multiple <option>-ef</option> options can be specified on the command line, "
@@ -326,6 +363,7 @@ msgstr ""
 "<option>-e</option>."
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:213
 msgid ""
 "The <option>-info</option> option displays the files/directories as they are "
@@ -339,6 +377,7 @@ msgstr ""
 "déjà présent."
 
 # type: Content of: <refentry><refsect1><para>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:219
 msgid ""
 "The <option>-no-exports</option> option doesn't make the filesystem "
@@ -348,6 +387,7 @@ msgstr ""
 "de fichiers par NFS"
 
 # type: Content of: <refentry><refsect1><para>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:222
 msgid ""
 "The <option>-no-progress</option> option doesn't display the progress bar."
@@ -355,6 +395,7 @@ msgstr ""
 "L'option <option>-no-progress</option> n'affiche pas la barre de progression"
 
 # type: Content of: <refentry><refsect1><simpara>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:225
 msgid ""
 "The <option>-le</option> and <option>-be</option> options can be used to "
@@ -377,26 +418,31 @@ msgstr ""
 "système de fichiers généré pour une architecture différente."
 
 # type: Content of: <refentry><refsect1><title>
+#. type: Content of: <refentry><refsect1><title>
 #: ../en/mksquashfs.dbk:237
 msgid "OPTIONS"
 msgstr "OPTIONS"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:242
 msgid "<option>-version</option>"
 msgstr "<option>-version</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:245
 msgid "print version, licence and copyright message."
 msgstr "affiche la version, la licence et un message de copyright."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:250
 msgid "<option>-recover <replaceable>name</replaceable></option>"
 msgstr "<option>-recover <replaceable>nom</replaceable></option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:253
 msgid ""
 "Allows the original filesystem to be recovered if Mksquashfs aborts "
@@ -411,61 +457,73 @@ msgstr ""
 "de fichier Squashfs existant."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:262
 msgid "<option>-no-recovery</option>"
 msgstr "<option>-no-recovery</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:263
 msgid "don't generate a recovery file"
 msgstr "ne pas générer un fichier de restauration"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:268
 msgid "<option>-info</option>"
 msgstr "<option>-info</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:269
 msgid "print files written to filesystem"
 msgstr "affiche les fichiers ajoutés au système de fichiers."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:274
 msgid "<option>-no-exports</option>"
 msgstr "<option>-no-exports</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:275
 msgid "don't make the filesystem exportable via NFS"
 msgstr "permet d'éviter le partage du système de fichier par NFS"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:281
 msgid "<option>-no-progress</option>"
 msgstr "<option>-no-progress</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:282
 msgid "don't display the progress bar"
 msgstr "n'affiche pas la barre de progression"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:287
 msgid "<option>-no-sparse</option>"
 msgstr "<option>-no-sparse</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:288
 msgid "don't detect sparse files"
 msgstr "ne pas détecter les fichiers vides"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:293
 msgid "<option>-b <replaceable>block_size</replaceable></option>"
 msgstr "<option>-b <replaceable>taille_bloc</replaceable></option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:295
 msgid ""
 "set data block to <replaceable>block_size</replaceable>. Default is 131072 "
@@ -475,11 +533,13 @@ msgstr ""
 "Par défaut, elle vaut 65536 octets."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:302
 msgid "<option>-processors <replaceable>number</replaceable></option>"
 msgstr "<option>-processors <replaceable>nombre</replaceable></option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:304
 msgid ""
 "Use <replaceable>number</replaceable> processors.  By default will use "
@@ -489,11 +549,13 @@ msgstr ""
 "nombre de processeurs disponibles"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:311
 msgid "<option>-read-queue <replaceable>size</replaceable></option>"
 msgstr "<option>-read-queue <replaceable>taille</replaceable></option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:313
 msgid ""
 "Set input queue to <replaceable>size</replaceable> Mbytes. Default 64 Mbytes."
@@ -502,11 +564,13 @@ msgstr ""
 "valeur par défaut est 64Mo."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:320
 msgid "<option>-write-queue <replaceable>size</replaceable></option>"
 msgstr "<option>-write-queue <replaceable>taille</replaceable></option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:322
 msgid ""
 "Set output queue to <replaceable>size</replaceable> Mbytes. Default 512 "
@@ -516,41 +580,49 @@ msgstr ""
 "valeur par défaut est 512Mo."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:329
 msgid "<option>-noI</option> or <option>-noInodeCompression</option>"
 msgstr "<option>-noI</option> ou <option>-noInodeCompression</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:331
 msgid "do not compress inode table"
 msgstr "ne comprime pas la table des i-noeuds."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:336
 msgid "<option>-noD</option>or <option>-noDataCompression</option>"
 msgstr "<option>-noD</option> ou <option>-noDataCompression</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:338
 msgid "do not compress data blocks"
 msgstr "ne comprime pas les blocs de données."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:343
 msgid "<option>-noF</option> or <option>-noFragmentCompression</option>"
 msgstr "<option>-noF</option> ou <option>-noFragmentCompression</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:345
 msgid "do not compress fragment blocks"
 msgstr "ne comprime pas les blocs fragmentés."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:350
 msgid "<option>-no-fragments</option>"
 msgstr "<option>-no-fragments</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:351
 msgid ""
 "do not use fragments: tells <command>&dhpackage;</command> to not generate "
@@ -565,11 +637,13 @@ msgstr ""
 "être monté par un système Squashfs en version 1.x."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:361
 msgid "<option>-always-use-fragments</option>"
 msgstr "<option>-always-use-fragments</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:362
 msgid ""
 "use fragment blocks for files larger than block size: tells "
@@ -603,11 +677,13 @@ msgstr ""
 "<emphasis>mais</emphasis> au dépens de la vitesse d'accès."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:384
 msgid "<option>-no-duplicates</option>"
 msgstr "<option>-no-duplicates</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:385
 msgid ""
 "do not perform duplicate checking: tells <command>&dhpackage;</command> to "
@@ -622,21 +698,25 @@ msgstr ""
 "nettement moins bon s'il y a beaucoup de fichiers aux contenus identiques."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:395
 msgid "<option>-noappend</option>"
 msgstr "<option>-noappend</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:396
 msgid "do not append to existing filesystem"
 msgstr "ne pas ajouter en fin d'un système de fichiers existant."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:402
 msgid "<option>-keep-as-directory</option>"
 msgstr "<option>-keep-as-directory</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:403
 msgid ""
 "if one source directory is specified, create a root directory containing "
@@ -646,11 +726,13 @@ msgstr ""
 "répertoire plutôt que simplement son contenu."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:410
 msgid "<option>-root-becomes <replaceable>name</replaceable></option>"
 msgstr "<option>-root-becomes <replaceable>nom</replaceable></option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:412
 msgid ""
 "when appending source files/directories, make the original root become a "
@@ -663,11 +745,13 @@ msgstr ""
 "fichiers et les nouveaux."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:420
 msgid "<option>-all-root</option> or <option>-root-owned</option>"
 msgstr "<option>-all-root</option> ou <option>-root-owned</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:422
 msgid "make all files owned by root"
 msgstr ""
@@ -675,11 +759,13 @@ msgstr ""
 "literal>."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:427
 msgid "<option>-force-uid <replaceable>uid</replaceable></option>"
 msgstr "<option>-force-uid <replaceable>uid</replaceable></option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:429
 msgid "set all file uids to <replaceable>uid</replaceable>"
 msgstr ""
@@ -687,11 +773,13 @@ msgstr ""
 "d'identifiant <replaceable>uid</replaceable> (un nom ou un nombre)."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:435
 msgid "<option>-force-gid <replaceable>gid</replaceable></option>"
 msgstr "<option>-force-gid <replaceable>gid</replaceable></option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:437
 msgid "set all file gids to <replaceable>gid</replaceable>"
 msgstr ""
@@ -699,11 +787,13 @@ msgstr ""
 "<replaceable>gid</replaceable> (un nom ou un nombre)."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:443
 msgid "<option>-le</option>"
 msgstr "<option>-le</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:444
 msgid "create a little endian filesystem"
 msgstr ""
@@ -711,11 +801,13 @@ msgstr ""
 "endian</foreignphrase> en anglais)."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:449
 msgid "<option>-be</option>"
 msgstr "<option>-be</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:450
 msgid "create a big endian filesystem"
 msgstr ""
@@ -723,11 +815,13 @@ msgstr ""
 "endian</foreignphrase> en anglais)."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:455
 msgid "<option>-nopad</option>"
 msgstr "<option>-nopad</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:456
 msgid ""
 "do not pad filesystem to a multiple of 4Ko.  This is performed by default to "
@@ -744,11 +838,13 @@ msgstr ""
 "exemple) ou être placé dans une image de démarrage, cet arrondi est inutile."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:466
 msgid "<option>-check_data</option>"
 msgstr "<option>-check_data</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:467
 msgid "add checkdata for greater filesystem checks"
 msgstr ""
@@ -756,11 +852,13 @@ msgstr ""
 "vérifications de ce système lorsqu'il est monté."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:473
 msgid "<option>-sort <replaceable>sort_file</replaceable></option>"
 msgstr "<option>-sort <replaceable>ordre</replaceable></option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:475
 msgid ""
 "sort files according to priorities in <replaceable>sort_file</replaceable>.  "
@@ -773,6 +871,7 @@ msgstr ""
 "32767, 0 par défaut)."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:483
 msgid ""
 "<option>-e <replaceable>list of exclude dirs/files</replaceable></option>"
@@ -781,16 +880,19 @@ msgstr ""
 "option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:485
 msgid "inline list of files / directories to exclude"
 msgstr "liste (en ligne) des fichiers et répertoires à exclure."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:491
 msgid "<option>-ef <replaceable>exclude_file</replaceable></option>"
 msgstr "<option>-ef <replaceable>fichier_exclus</replaceable></option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><simpara>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:493
 msgid "file containing a list of files / directories to exclude, one per line"
 msgstr ""
@@ -798,11 +900,13 @@ msgstr ""
 "fichiers ou répertoires à exclure, un par ligne."
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:499
 msgid "<option>-wildcards</option>"
 msgstr "<option>-wildcards</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:500
 msgid ""
 "Allow extended shell wildcards (globbing) to be used in exclude dirs/files"
@@ -811,11 +915,13 @@ msgstr ""
 "afin d'exclure des répertoires ou fichiers"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><term>
 #: ../en/mksquashfs.dbk:505
 msgid "<option>-regex</option>"
 msgstr "<option>-regex</option>"
 
 # type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
+#. type: Content of: <refentry><refsect1><variablelist><varlistentry><listitem><para>
 #: ../en/mksquashfs.dbk:506
 msgid "Allow POSIX regular expressions to be used in exclude dirs/files"
 msgstr ""
@@ -823,16 +929,19 @@ msgstr ""
 "fichiers ou répertoires"
 
 # type: Content of: <refentry><refsect1><title>
+#. type: Content of: <refentry><refsect1><title>
 #: ../en/mksquashfs.dbk:514
 msgid "EXAMPLES"
 msgstr "EXEMPLES"
 
 # type: Content of: <refentry><refsect1><para>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:516
 msgid "For following examples, take two example directories:"
 msgstr "Pour les exemples suivants, on utilise deux répertoires :"
 
 # type: Content of: <refentry><refsect1><para><itemizedlist><listitem><simpara>
+#. type: Content of: <refentry><refsect1><para><itemizedlist><listitem><para>
 #: ../en/mksquashfs.dbk:519
 msgid ""
 "Source directory <filename>/home/phillip/test</filename> contains "
@@ -844,6 +953,7 @@ msgstr ""
 "<filename>rep1</filename>."
 
 # type: Content of: <refentry><refsect1><para><itemizedlist><listitem><simpara>
+#. type: Content of: <refentry><refsect1><para><itemizedlist><listitem><para>
 #: ../en/mksquashfs.dbk:525
 msgid ""
 "Source directory <filename>goodies</filename> contains <filename>goodies1</"
@@ -853,12 +963,20 @@ msgstr ""
 "filename>, <filename>outils2</filename> et <filename>outils3</filename>."
 
 # type: Content of: <refentry><refsect1><refsect2><example><screen>
+#. type: Content of: <refentry><refsect1><refsect2><example><screen>
 #: ../en/mksquashfs.dbk:537
 #, no-wrap
 msgid "<userinput>mksquashfs /home/phillip/test output_fs</userinput>"
 msgstr "<userinput>mksquashfs /home/phillip/test sf_resultat</userinput>"
 
+#. type: Content of: <refentry><refsect1><refsect2><example>
+#: ../en/mksquashfs.dbk:537 ../en/mksquashfs.dbk:547 ../en/mksquashfs.dbk:559
+#: ../en/mksquashfs.dbk:575
+msgid "<placeholder type=\"screen\" id=\"0\"/>"
+msgstr ""
+
 # type: Content of: <refentry><refsect1><refsect2><example><simpara>
+#. type: Content of: <refentry><refsect1><refsect2><example><para>
 #: ../en/mksquashfs.dbk:538
 msgid ""
 "This will generate a squashfs filesystem with root entries <filename>file1</"
@@ -869,12 +987,14 @@ msgstr ""
 "<filename>rep1</filename>."
 
 # type: Content of: <refentry><refsect1><refsect2><example><screen>
+#. type: Content of: <refentry><refsect1><refsect2><example><screen>
 #: ../en/mksquashfs.dbk:547
 #, no-wrap
 msgid "<userinput>mksquashfs /home/phillip/test goodies output_fs</userinput>"
 msgstr "<userinput>mksquashfs /home/phillip/test outils sf_resultat</userinput>"
 
 # type: Content of: <refentry><refsect1><refsect2><example><simpara>
+#. type: Content of: <refentry><refsect1><refsect2><example><para>
 #: ../en/mksquashfs.dbk:548
 msgid ""
 "This will create a squashfs filesystem with the root containing entries "
@@ -888,12 +1008,14 @@ msgstr ""
 "et <filename>outils</filename>."
 
 # type: Content of: <refentry><refsect1><refsect2><example><screen>
+#. type: Content of: <refentry><refsect1><refsect2><example><screen>
 #: ../en/mksquashfs.dbk:559
 #, no-wrap
 msgid "<userinput>mksquashfs /home/phillip/test goodies test output_fs</userinput>"
 msgstr "<userinput>mksquashfs /home/phillip/test outils test sf_resultat</userinput>"
 
 # type: Content of: <refentry><refsect1><refsect2><example><simpara>
+#. type: Content of: <refentry><refsect1><refsect2><example><para>
 #: ../en/mksquashfs.dbk:561
 msgid ""
 "This is the same as the previous example, except a third source directory "
@@ -907,6 +1029,7 @@ msgstr ""
 "donc renommé <filename>test_1</filename>."
 
 # type: Content of: <refentry><refsect1><refsect2><example><simpara>
+#. type: Content of: <refentry><refsect1><refsect2><example><para>
 #: ../en/mksquashfs.dbk:566
 msgid ""
 "Multiple sources allow filesystems to be generated without needing to copy "
@@ -918,12 +1041,14 @@ msgstr ""
 "répertoire commun, ce qui simplifie le processus."
 
 # type: Content of: <refentry><refsect1><refsect2><example><screen>
+#. type: Content of: <refentry><refsect1><refsect2><example><screen>
 #: ../en/mksquashfs.dbk:575
 #, no-wrap
 msgid "<userinput>mksquashfs /home/phillip/test output_fs -keep-as-directory</userinput>"
 msgstr "<userinput>mksquashfs /home/phillip/test sf_resultat -keep-as-directory</userinput>"
 
 # type: Content of: <refentry><refsect1><refsect2><example><simpara>
+#. type: Content of: <refentry><refsect1><refsect2><example><para>
 #: ../en/mksquashfs.dbk:577
 msgid ""
 "This is the same as the first example, except for <option>-keep-as-"
@@ -939,11 +1064,13 @@ msgstr ""
 "<filename>rep1</filename>."
 
 # type: Content of: <refentry><refsect1><title>
+#. type: Content of: <refentry><refsect1><title>
 #: ../en/mksquashfs.dbk:590
 msgid "AUTHORS"
 msgstr "AUTEURS"
 
 # type: Content of: <refentry><refsect1><para>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:592
 msgid ""
 "Squashfs was written by <personname> <firstname>Phillip</firstname> "
@@ -958,6 +1085,7 @@ msgstr ""
 "intéressé par des retours d'expérience."
 
 # type: Content of: <refentry><refsect1><para>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:600
 msgid ""
 "This manual page was written by &dhusername; &dhemail; for the &debian; "
@@ -977,6 +1105,7 @@ msgstr ""
 "version 2 ou postérieure, telle que publiée par la Free Software Foundation."
 
 # type: Content of: <refentry><refsect1><para>
+#. type: Content of: <refentry><refsect1><para>
 #: ../en/mksquashfs.dbk:613
 msgid ""
 "On Debian systems, the complete text of the &gnu; General Public License can "
@@ -985,3 +1114,7 @@ msgstr ""
 "Sur les systèmes Debian, le texte complet de la licence &gpl; (Licence "
 "Public Générale &gnu;) se trouve dans le fichier <filename>/usr/share/common-"
 "licenses/GPL</filename>."
+
+# type: Content of: <refentry><refentryinfo><copyright><holder>
+#~ msgid "&dhusername;"
+#~ msgstr "&dhusername;"
