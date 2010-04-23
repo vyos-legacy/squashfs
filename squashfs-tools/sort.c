@@ -74,7 +74,8 @@ struct sort_info *sort_info_list[65536];
 struct priority_entry *priority_list[65536];
 
 extern int silent;
-extern void write_file(squashfs_inode *inode, struct dir_ent *dir_ent, int *c_size);
+extern void write_file(squashfs_inode *inode, struct dir_ent *dir_ent,
+	int *c_size);
 
 
 int add_priority_list(struct dir_ent *dir, int priority)
@@ -101,7 +102,8 @@ int get_priority(char *filename, struct stat *buf, int priority)
 
 	for(s = sort_info_list[hash]; s; s = s->next)
 		if((s->st_dev == buf->st_dev) && (s->st_ino == buf->st_ino)) {
-			TRACE("returning priority %d (%s)\n", s->priority, filename);
+			TRACE("returning priority %d (%s)\n", s->priority,
+				filename);
 			return s->priority;
 		}
 	TRACE("returning priority %d (%s)\n", priority, filename);
@@ -134,10 +136,12 @@ int add_sort_list(char *path, int priority, int source, char *source_path[])
 
 	TRACE("add_sort_list: filename %s, priority %d\n", path, priority);
 re_read:
-	if(path[0] == '/' || strncmp(path, "./", 2) == 0 || strncmp(path, "../", 3) == 0 || mkisofs_style == 1) {
+	if(path[0] == '/' || strncmp(path, "./", 2) == 0 ||
+			strncmp(path, "../", 3) == 0 || mkisofs_style == 1) {
 		if(lstat(path, &buf) == -1)
 			goto error;
-		TRACE("adding filename %s, priority %d, st_dev %llx, st_ino %llx\n", path, priority, buf.st_dev, buf.st_ino);
+		TRACE("adding filename %s, priority %d, st_dev %llx, st_ino "
+			"%llx\n", path, priority, buf.st_dev, buf.st_ino);
 		ADD_ENTRY(buf, priority);
 		return TRUE;
 	}
@@ -154,13 +158,17 @@ re_read:
 	}
 
 	if(n == 0 && mkisofs_style == -1 && lstat(path, &buf) != -1) {
-		ERROR("WARNING: Mkisofs style sortlist detected! This is supported but please\n");
-		ERROR("convert to mksquashfs style sortlist! A sortlist entry ");
-	        ERROR("should be\neither absolute (starting with ");
-		ERROR("'/') start with './' or '../' (taken to be\nrelative to $PWD), otherwise it ");
-		ERROR("is assumed the entry is relative to one\nof the source directories, i.e. with ");
+		ERROR("WARNING: Mkisofs style sortlist detected! This is "
+			"supported but please\n");
+		ERROR("convert to mksquashfs style sortlist! A sortlist entry");
+	        ERROR(" should be\neither absolute (starting with ");
+		ERROR("'/') start with './' or '../' (taken to be\nrelative to "
+			"$PWD), otherwise it ");
+		ERROR("is assumed the entry is relative to one\nof the source "
+			"directories, i.e. with ");
 		ERROR("\"mksquashfs test test.sqsh\",\nthe sortlist ");
-		ERROR("entry \"file\" is assumed to be inside the directory test.\n\n");
+		ERROR("entry \"file\" is assumed to be inside the directory "
+			"test.\n\n");
 		mkisofs_style = 1;
 		goto re_read;
 	}
@@ -170,7 +178,9 @@ re_read:
 	if(n == 1)
 		return TRUE;
 	if(n > 1)
-		BAD_ERROR(" Ambiguous sortlist entry \"%s\"\n\nIt maps to more than one source entry!  Please use an absolute path.\n", path);
+		BAD_ERROR(" Ambiguous sortlist entry \"%s\"\n\nIt maps to more "
+			"than one source entry!  Please use an absolute path."
+			"\n", path);
 
 error:
         fprintf(stderr, "Cannot stat sortlist entry \"%s\"\n", path);
@@ -180,7 +190,8 @@ error:
 }
 
 
-void generate_file_priorities(struct dir_info *dir, int priority, struct stat *buf)
+void generate_file_priorities(struct dir_info *dir, int priority,
+	struct stat *buf)
 {
 	priority = get_priority(dir->pathname, buf, priority);
 
@@ -192,10 +203,13 @@ void generate_file_priorities(struct dir_info *dir, int priority, struct stat *b
 
 		switch(buf->st_mode & S_IFMT) {
 			case S_IFREG:
-				add_priority_list(dir_ent, get_priority(dir_ent->pathname, buf, priority));
+				add_priority_list(dir_ent,
+					get_priority(dir_ent->pathname, buf,
+					priority));
 				break;
 			case S_IFDIR:
-				generate_file_priorities(dir_ent->dir, priority, buf);
+				generate_file_priorities(dir_ent->dir, priority,
+					buf);
 				break;
 		}
 	}
@@ -215,9 +229,12 @@ int read_sort_file(char *filename, int source, char *source_path[])
 	}
 	while(fscanf(fd, "%s %d", sort_filename, &priority) != EOF)
 		if(priority >= -32768 && priority <= 32767)
-			add_sort_list(sort_filename, priority, source, source_path);
+			add_sort_list(sort_filename, priority, source,
+				source_path);
 		else
-			ERROR("Sort file %s, priority %d outside range of -32767:32768 - skipping...\n", sort_filename, priority);
+			ERROR("Sort file %s, priority %d outside range of "
+				"-32767:32768 - skipping...\n", sort_filename,
+				priority);
 	fclose(fd);
 	return TRUE;
 }
@@ -235,14 +252,15 @@ void sort_files_and_write(struct dir_info *dir)
 			TRACE("%d: %s\n", i - 32768, entry->dir->pathname);
 			if(entry->dir->inode->inode == SQUASHFS_INVALID_BLK) {
 				write_file(&inode, entry->dir, &duplicate_file);
-				INFO("file %s, uncompressed size %lld bytes %s\n",
-					entry->dir->pathname,
+				INFO("file %s, uncompressed size %lld bytes %s"
+					"\n", entry->dir->pathname,
 					entry->dir->inode->buf.st_size,
 					duplicate_file ? "DUPLICATE" : "");
 				entry->dir->inode->inode = inode;
 				entry->dir->inode->type = SQUASHFS_FILE_TYPE;
 			} else
-				INFO("file %s, uncompressed size %lld bytes LINK\n",
-					entry->dir->pathname, entry->dir->inode->buf.st_size);
+				INFO("file %s, uncompressed size %lld bytes "
+					"LINK\n", entry->dir->pathname,
+					entry->dir->inode->buf.st_size);
 		}
 }
