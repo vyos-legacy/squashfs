@@ -363,4 +363,14 @@ struct squashfs_fragment_entry {
 	unsigned int		unused;
 };
 
+struct squashfs_xattr_entry {
+	unsigned int		name_len;
+	unsigned int		value_len;
+	char			name_and_value_data[0];
+};
+
+struct squashfs_xattr_header {
+	unsigned int		size;
+};
+
 #endif

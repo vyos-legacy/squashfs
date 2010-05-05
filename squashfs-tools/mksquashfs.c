@@ -43,6 +43,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/mman.h>
+#include <attr/xattr.h>
 #include <pthread.h>
 #include <math.h>
 #include <regex.h>
@@ -124,6 +125,7 @@ int sparse_files = TRUE;
 int old_exclude = TRUE;
 int use_regex = FALSE;
 int first_freelist = TRUE;
+int no_attribute = FALSE;
 
 /* superblock attributes */
 int block_size = SQUASHFS_FILE_SIZE, block_log;
@@ -141,6 +143,14 @@ unsigned int directory_bytes = 0, directory_size = 0, total_directory_bytes = 0;
 /* cached directory table */
 char *directory_data_cache = NULL;
 unsigned int directory_cache_bytes = 0, directory_cache_size = 0;
+
+/* in memory xattr table - possibly compressed */
+char *xattr_table = NULL;
+unsigned int xattr_bytes = 0, xattr_size = 0, total_xattr_bytes = 0;
+
+/* cached xattr table */
+char *xattr_data_cache = NULL;
+unsigned xattr_cache_bytes = 0, xattr_cache_size = 0;
 
 /* in memory inode table - possibly compressed */
 char *inode_table = NULL;
@@ -272,13 +282,15 @@ int interrupted = 0;
 /* restore orignal filesystem state if appending to existing filesystem is
  * cancelled */
 jmp_buf env;
-char *sdata_cache, *sdirectory_data_cache, *sdirectory_compressed;
+char *sdata_cache, *sdirectory_data_cache, *sdirectory_compressed,
+	*sxattr_cache;
 
 long long sbytes, stotal_bytes;
 
 unsigned int sinode_bytes, scache_bytes, sdirectory_bytes,
 	sdirectory_cache_bytes, sdirectory_compressed_bytes,
 	stotal_inode_bytes, stotal_directory_bytes,
+	sxattr_bytes, sxattr_cache_bytes,
 	sinode_count = 0, sfile_count, ssym_count, sdev_count,
 	sdir_count, sfifo_count, ssock_count, sdup_files;
 int sfragments;
@@ -750,6 +762,8 @@ void restorefs()
  	memcpy(directory_table + directory_bytes, sdirectory_compressed,
 		sdirectory_compressed_bytes);
  	directory_bytes += sdirectory_compressed_bytes;
+	xattr_bytes = sxattr_bytes;
+	memcpy(xattr_table + xattr_bytes, sxattr_cache,  sxattr_bytes);
 	total_bytes = stotal_bytes;
 	total_inode_bytes = stotal_inode_bytes;
 	total_directory_bytes = stotal_directory_bytes;
@@ -1087,6 +1101,49 @@ long long write_id_table()
 }
 
 
+long long write_xattr_table()
+{
+	unsigned short c_byte;
+	int avail_bytes;
+	char *xattrp = xattr_data_cache;
+	long long start_bytes = bytes;
+
+	if(no_attribute || xattr_cache_bytes == 0)
+		return SQUASHFS_INVALID_BLK;
+
+	while(xattr_cache_bytes) {
+		if(xattr_size - xattr_bytes <
+				((SQUASHFS_METADATA_SIZE << 1) + 2)) {
+			xattr_table = realloc(xattr_table,
+				xattr_size + ((SQUASHFS_METADATA_SIZE << 1)
+				+ 2));
+			if(xattr_table == NULL) {
+				BAD_ERROR("Out of memory in xattr table "
+					"reallocation!\n");
+			}
+			xattr_size += (SQUASHFS_METADATA_SIZE << 1) + 2;
+		}
+		avail_bytes = xattr_cache_bytes > SQUASHFS_METADATA_SIZE ?
+			SQUASHFS_METADATA_SIZE : xattr_cache_bytes;
+		c_byte = mangle(xattr_table + xattr_bytes +
+			BLOCK_OFFSET, xattrp, avail_bytes,
+			SQUASHFS_METADATA_SIZE, noI, 0);
+		TRACE("Xattr block @ 0x%x, size %d\n", xattr_bytes,
+			c_byte);
+		SQUASHFS_SWAP_SHORTS(&c_byte,
+			xattr_table + xattr_bytes, 1);
+		xattr_bytes += SQUASHFS_COMPRESSED_SIZE(c_byte) +
+			BLOCK_OFFSET;
+		total_xattr_bytes += avail_bytes + BLOCK_OFFSET;
+		xattrp += avail_bytes;
+		xattr_cache_bytes -= avail_bytes;
+	}
+	write_destination(fd, bytes, xattr_bytes, (char *) xattr_table);
+	bytes += xattr_bytes;
+
+	return start_bytes;
+}
+
 struct id *get_id(unsigned int id)
 {
 	int hash = ID_HASH(id);
@@ -1153,6 +1210,49 @@ unsigned int get_guid(unsigned int guid)
 	return entry->index;
 }
 
+int create_xattr(struct inode_info *inode)
+{
+	struct xattr_info *attr;
+	struct squashfs_xattr_header header;
+	unsigned int start;
+	char *p;
+
+	if (inode->attribute == NULL)
+		return -1;
+
+	/* TODO: Add deduplication here */
+	header.size = sizeof(struct squashfs_xattr_header);
+	for (attr = inode->attribute; attr; attr = attr->next)
+		header.size += sizeof(struct squashfs_xattr_entry)
+			+ strlen(attr->name) + attr->length;
+
+	start = xattr_cache_bytes;
+	xattr_cache_bytes += header.size;
+	xattr_data_cache = realloc(xattr_data_cache, xattr_cache_bytes);
+	if (xattr_data_cache == NULL)
+		BAD_ERROR("Out of memory for xattr data cache reallocation\n");
+
+	p = xattr_data_cache + start;
+	SQUASHFS_SWAP_INTS(&header.size, p, 1);
+	p += sizeof(header);
+
+	for (attr = inode->attribute; attr; attr = attr->next) {
+		struct squashfs_xattr_entry entry;
+
+		entry.name_len = strlen(attr->name);
+		entry.value_len = attr->length;
+
+		SQUASHFS_SWAP_XATTR_ENTRY(&entry, p);
+		p += sizeof(entry);
+
+		memcpy(p, attr->name, entry.name_len);
+		p += entry.name_len;
+		memcpy(p, attr->value, entry.value_len);
+		p += entry.value_len;
+	}
+
+	return start;
+}
 
 int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 	struct dir_ent *dir_ent, int type, long long byte_size,
@@ -1165,18 +1265,21 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 	void *inode;
 	char *filename = dir_ent->pathname;
 	int nlink = dir_ent->inode->nlink;
+	int xattr = create_xattr(dir_ent->inode);
 	int inode_number = type == SQUASHFS_DIR_TYPE ?
 		dir_ent->inode->inode_number :
 		dir_ent->inode->inode_number + dir_inode_no;
 
-	if(type == SQUASHFS_DIR_TYPE && dir_info->dir_is_ldir)
+	if(type == SQUASHFS_DIR_TYPE &&
+			(dir_info->dir_is_ldir || xattr != -1))
 		type = SQUASHFS_LDIR_TYPE;
 
 	if(type == SQUASHFS_FILE_TYPE &&
 			(dir_ent->inode->nlink > 1 ||
-			byte_size >= (1LL << 32) ||
-			start_block >= (1LL << 32) ||
-			sparse))
+			 xattr != -1 ||
+			 byte_size >= (1LL << 32) ||
+			 start_block >= (1LL << 32) ||
+			 sparse))
 		type = SQUASHFS_LREG_TYPE;
 
 	base->mode = SQUASHFS_MODE(buf->st_mode);
@@ -1221,6 +1324,8 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 		if(sparse && sparse >= byte_size)
 			sparse = byte_size - 1;
 		reg->sparse = sparse;
+		reg->xattr = xattr;
+
 		SQUASHFS_SWAP_LREG_INODE_HEADER(reg, inode);
 		SQUASHFS_SWAP_INTS(block_list, inode + off, offset);
 		TRACE("Long file inode, file_size %lld, start_block 0x%llx, "
@@ -2675,7 +2780,6 @@ void write_file_frag(squashfs_inode *inode, struct dir_ent *dir_ent, int size,
 
 	create_inode(inode, NULL, dir_ent, SQUASHFS_FILE_TYPE, size, 0,
 			0, NULL, fragment, NULL, 0);
-
 	return;
 }
 
@@ -3106,8 +3210,53 @@ char *basename_r()
 	}
 }
 
+struct xattr_info *lookup_xattr(const char *path)
+{
+	struct xattr_info *head = NULL, **top = &head;
+	const char *cp;
+	ssize_t len;
 
-struct inode_info *lookup_inode(struct stat *buf)
+	if (path == NULL)
+		return NULL;
+
+	len = llistxattr(path, NULL, 0);
+	if (len <= 0)
+		return NULL;
+
+	char buf[len];
+
+	len = llistxattr(path, buf, len);
+	if (len <= 0) {
+		ERROR("Cannot get listxattr %s because %s, ignoring",
+		      path, strerror(errno));
+		return NULL;
+	}
+
+	for (cp = buf; cp < buf + len; cp += strlen(cp) + 1) {
+		struct xattr_info *info;
+		int value_len;
+
+		if ((value_len = lgetxattr(path, cp, NULL, 0)) < 0) {
+			ERROR("Cannot getxattr %s(%s) because %s, ignoring",
+			      path, cp, strerror(errno));
+			break;
+		}
+
+		info = malloc(sizeof(struct xattr_info) + value_len);
+		if (info == NULL || (info->name = strdup(cp)) == NULL)
+			BAD_ERROR("Out of memory for xattr info allocation\n");
+
+		info->length = lgetxattr(path, info->name,
+					 info->value, value_len);
+		*top = info;
+		top = &info->next;
+		info->next = NULL;
+	}
+
+	return head;
+}
+
+struct inode_info *lookup_inode(struct stat *buf, const char *pathname)
 {
 	int inode_hash = INODE_HASH(buf->st_dev, buf->st_ino);
 	struct inode_info *inode = inode_info[inode_hash];
@@ -3130,6 +3279,8 @@ struct inode_info *lookup_inode(struct stat *buf)
 	inode->pseudo_file = FALSE;
 	inode->inode = SQUASHFS_INVALID_BLK;
 	inode->nlink = 1;
+	if (pathname)
+		inode->attribute = lookup_xattr(pathname);
 
 	if((buf->st_mode & S_IFMT) == S_IFREG)
 		estimated_uncompressed += (buf->st_size + block_size - 1) >>
@@ -3402,7 +3553,7 @@ void dir_scan(squashfs_inode *inode, char *pathname,
 		return;
 	}
 
-	dir_ent->inode = lookup_inode(&buf);
+	dir_ent->inode = lookup_inode(&buf, pathname);
 	if(root_inode_number) {
 		dir_ent->inode->inode_number = root_inode_number;
 		dir_inode_no --;
@@ -3478,8 +3629,8 @@ struct dir_info *dir_scan1(char *pathname, struct pathnames *paths,
 		} else
 			sub_dir = NULL;
 
-		add_dir_entry(dir_name, filename, sub_dir, lookup_inode(&buf),
-			dir);
+		add_dir_entry(dir_name, filename, sub_dir, 
+			      lookup_inode(&buf, filename), dir);
 	}
 
 	scan1_freedir(dir);
@@ -3581,25 +3732,26 @@ struct dir_info *dir_scan2(struct dir_info *dir, struct pseudo *pseudo)
 				continue;
 			}
 			buf.st_size = buf2.st_size;
-			inode = lookup_inode(&buf);
+			inode = lookup_inode(&buf, NULL);
 			inode->pseudo_file = PSEUDO_FILE_OTHER;		
 			add_dir_entry(pseudo_ent->name,
 				pseudo_ent->dev->filename, sub_dir, inode,
 				dir);
 #else
-			struct inode_info *inode = lookup_inode(&buf);
+			struct inode_info *inode = lookup_inode(&buf, NULL);
 			inode->pseudo_id = pseudo_ent->dev->pseudo_id;
 			inode->pseudo_file = PSEUDO_FILE_PROCESS;		
 			add_dir_entry(pseudo_ent->name, pseudo_ent->pathname,
 				sub_dir, inode, dir);
 #endif
 		} else {
-			struct inode_info *inode = lookup_inode(&buf);
+			struct inode_info *inode = lookup_inode(&buf, NULL);
 			inode->pseudo_file = PSEUDO_FILE_OTHER;		
 			add_dir_entry(pseudo_ent->name, pseudo_ent->pathname,
 				sub_dir, inode, dir);
 		}
 	}
+
 
 	scan2_freedir(dir);
 	sort_directory(dir);
@@ -4538,6 +4690,9 @@ int main(int argc, char *argv[])
 		else if(strcmp(argv[i], "-keep-as-directory") == 0)
 			keep_as_directory = TRUE;
 
+		else if(strcmp(argv[i], "-noattribute") == 0)
+			no_attribute = TRUE;
+
 		else if(strcmp(argv[i], "-root-becomes") == 0) {
 			if(++i == argc) {
 				ERROR("%s: -root-becomes: missing name\n",
@@ -4598,6 +4753,8 @@ printOptions:
 			ERROR("\nFilesystem append options:\n");
 			ERROR("-noappend\t\tdo not append to existing "
 				"filesystem\n");
+			ERROR("-noattribute\t\tdo not use extended attributes "
+			      "in filesystem\n");
 			ERROR("-root-becomes <name>\twhen appending source "
 				"files/directories, make the\n");
 			ERROR("\t\t\toriginal root become a subdirectory in "
@@ -4841,9 +4998,12 @@ printOptions:
 		sdirectory_cache_bytes = uncompressed_data;
 		sdata_cache = malloc(scache_bytes);
 		sdirectory_data_cache = malloc(sdirectory_cache_bytes);
+		sxattr_bytes = xattr_bytes;
+		sxattr_cache = malloc(sxattr_bytes);
 		memcpy(sdata_cache, data_cache, scache_bytes);
 		memcpy(sdirectory_data_cache, directory_data_cache +
 			compressed_data, sdirectory_cache_bytes);
+		memcpy(sxattr_cache, xattr_data_cache, sxattr_bytes);
 		sinode_bytes = root_inode_start;
 		stotal_bytes = total_bytes;
 		stotal_inode_bytes = total_inode_bytes;
@@ -4985,15 +5145,14 @@ restore_filesystem:
 		TRACE("sBlk->lookup_table_start 0x%llx\n",
 			sBlk.lookup_table_start);
 
+	sBlk.xattr_table_start = write_xattr_table();
+
 	sBlk.no_ids = id_count;
 	sBlk.id_table_start = write_id_table();
 
 	sBlk.bytes_used = bytes;
 
 	sBlk.compression = comp->id;
-
-	/* Xattrs are not currently supported */
-	sBlk.xattr_table_start = SQUASHFS_INVALID_BLK;
 
 	SQUASHFS_INSWAP_SUPER_BLOCK(&sBlk); 
 	write_destination(fd, SQUASHFS_START, sizeof(squashfs_super_block),
@@ -5011,9 +5170,10 @@ restore_filesystem:
 	if(recovery_file[0] != '\0')
 		unlink(recovery_file);
 
-	total_bytes += total_inode_bytes + total_directory_bytes + uid_count
-		* sizeof(unsigned short) + guid_count * sizeof(unsigned short) +
-		sizeof(squashfs_super_block);
+	total_bytes += total_inode_bytes + total_directory_bytes + xattr_bytes
+		+ uid_count * sizeof(unsigned short)
+		+ guid_count * sizeof(unsigned short)
+		+ sizeof(squashfs_super_block);
 
 	printf("\n%sSquashfs %d.%d filesystem, %s compressed, data block size"
 		" %d\n", exportable ? "Exportable " : "", SQUASHFS_MAJOR,
@@ -5038,6 +5198,13 @@ restore_filesystem:
 	printf("\t%.2f%% of uncompressed directory table size (%d bytes)\n",
 		((float) directory_bytes / total_directory_bytes) * 100.0,
 		total_directory_bytes);
+
+	printf("Extended Attributes table size %d bytes (%.2f Kbytes)\n",
+	       xattr_bytes, xattr_bytes / 1024.0);
+	printf("\t%.2f%% of uncompressed attribute table size (%d bytes)\n",
+		((float) xattr_bytes / total_xattr_bytes) * 100.0,
+		total_xattr_bytes);
+
 	if(duplicate_checking)
 		printf("Number of duplicate files found %d\n", file_count -
 			dup_files);
@@ -5054,7 +5221,6 @@ restore_filesystem:
 	printf("Number of directories %d\n", dir_count);
 	printf("Number of ids (unique uids + gids) %d\n", id_count);
 	printf("Number of uids %d\n", uid_count);
-
 	for(i = 0; i < id_count; i++) {
 		if(id_table[i]->flags & ISA_UID) {
 			struct passwd *user = getpwuid(id_table[i]->id);

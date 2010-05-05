@@ -188,6 +188,11 @@ extern void inswap_le64_num(long long *, int);
 	SWAP_FUNC(32, s, d, size, squashfs_fragment_entry);\
 }
 
+#define _SQUASHFS_SWAP_XATTR_ENTRY(s, d, SWAP_FUNC) {\
+	SWAP_FUNC##32(s, d, name_len);\
+	SWAP_FUNC##32(s, d, value_len);\
+}
+
 #define SQUASHFS_SWAP_SUPER_BLOCK(s, d)	\
 			_SQUASHFS_SWAP_SUPER_BLOCK(s, d, SWAP_LE)
 #define SQUASHFS_SWAP_DIR_INDEX(s, d) \
@@ -214,11 +219,15 @@ extern void inswap_le64_num(long long *, int);
 			_SQUASHFS_SWAP_DIR_HEADER(s, d, SWAP_LE)
 #define SQUASHFS_SWAP_FRAGMENT_ENTRY(s, d) \
 			_SQUASHFS_SWAP_FRAGMENT_ENTRY(s, d, SWAP_LE)
+#define SQUASHFS_SWAP_XATTR_ENTRY(s,d)
+			_SQUASHFS_SWAP_XATTR_ENTRY(s, d, SWAP_LE)
+
 #define SWAP_LE(bits, s, d, field, type) \
 			SWAP_LE##bits(((void *)(s)) + offsetof(type, field), \
 				((void *)(d)) + offsetof(type, field))
 #define SWAP_LES(bits, s, d, field, type) \
 			SWAP_LE(bits, s, d, field, type)
+
 #define SQUASHFS_SWAP_INODE_T(s, d) SQUASHFS_SWAP_LONG_LONGS(s, d, 1)
 #define SQUASHFS_SWAP_FRAGMENT_INDEXES(s, d, n) SQUASHFS_SWAP_LONG_LONGS(s, d, n)
 #define SQUASHFS_SWAP_LOOKUP_BLOCKS(s, d, n) SQUASHFS_SWAP_LONG_LONGS(s, d, n)
@@ -286,6 +295,8 @@ extern void inswap_le64_num(long long *, int);
 #define SQUASHFS_SWAP_DIR_HEADER(s, d) \
 		SQUASHFS_MEMCPY(s, d, sizeof(*(s)))
 #define SQUASHFS_SWAP_FRAGMENT_ENTRY(s, d) \
+		SQUASHFS_MEMCPY(s, d, sizeof(*(s)))
+#define SQUASHFS_SWAP_XATTR_ENTRY(s, d) \
 		SQUASHFS_MEMCPY(s, d, sizeof(*(s)))
 #define SQUASHFS_SWAP_INODE_T(s, d) SQUASHFS_SWAP_LONG_LONGS(s, d, 1)
 #define SQUASHFS_SWAP_FRAGMENT_INDEXES(s, d, n) SQUASHFS_SWAP_LONG_LONGS(s, d, n)
