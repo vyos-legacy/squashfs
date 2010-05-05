@@ -36,7 +36,6 @@ extern unsigned int get_guid(unsigned int);
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-#include <zlib.h>
 #include <sys/mman.h>
 
 #ifndef linux
@@ -51,6 +50,7 @@ extern unsigned int get_guid(unsigned int);
 #include "squashfs_swap.h"
 #include "read_fs.h"
 #include "global.h"
+#include "compressor.h"
 
 #include <stdlib.h>
 
@@ -66,7 +66,9 @@ extern unsigned int get_guid(unsigned int);
 						fprintf(stderr, s, ## args); \
 					} while(0)
 
-int read_block(int fd, long long start, long long *next, unsigned char *block,
+static struct compressor *comp;
+
+int read_block(int fd, long long start, long long *next, void *block,
 	squashfs_super_block *sBlk)
 {
 	unsigned short c_byte;
@@ -77,32 +79,24 @@ int read_block(int fd, long long start, long long *next, unsigned char *block,
 
 	if(SQUASHFS_COMPRESSED(c_byte)) {
 		char buffer[SQUASHFS_METADATA_SIZE];
-		int res;
-		unsigned long bytes = SQUASHFS_METADATA_SIZE;
+		int error, res;
 
 		c_byte = SQUASHFS_COMPRESSED_SIZE(c_byte);
 		read_destination(fd, start + offset, c_byte, buffer);
 
-		res = uncompress(block, &bytes, (const unsigned char *) buffer,
-			c_byte);
-		if(res != Z_OK) {
-			if(res == Z_MEM_ERROR)
-				ERROR("zlib::uncompress failed, not enough "
-					"memory\n");
-			else if(res == Z_BUF_ERROR)
-				ERROR("zlib::uncompress failed, not enough "
-					"room in output buffer\n");
-			else
-				ERROR("zlib::uncompress failed, unknown error "
-					"%d\n", res);
+		res = comp->uncompress(block, buffer, c_byte,
+			SQUASHFS_METADATA_SIZE, &error);
+		if(res == -1) {
+			ERROR("%s uncompress failed with error code %d\n",
+				comp->name, error);
 			return 0;
 		}
 		if(next)
 			*next = start + offset + c_byte;
-		return bytes;
+		return res;
 	} else {
 		c_byte = SQUASHFS_COMPRESSED_SIZE(c_byte);
-		read_destination(fd, start + offset, c_byte, (char *) block);
+		read_destination(fd, start + offset, c_byte, block);
 		if(next)
 			*next = start + offset + c_byte;
 		return c_byte;
@@ -160,26 +154,25 @@ int scan_inode_table(int fd, long long start, long long end,
 	 */
 	*root_inode_size = bytes - (*root_inode_block + root_inode_offset);
 	bytes = *root_inode_block + root_inode_offset;
-	SQUASHFS_SWAP_BASE_INODE_HEADER(&dir_inode->base,
-			(squashfs_base_inode_header *) (*inode_table + bytes));
+	SQUASHFS_SWAP_BASE_INODE_HEADER(&dir_inode->base, *inode_table + bytes);
 	if(dir_inode->base.inode_type == SQUASHFS_DIR_TYPE) {
 		SQUASHFS_SWAP_DIR_INODE_HEADER(&dir_inode->dir,
-			(squashfs_dir_inode_header *) (*inode_table + bytes));
+			*inode_table + bytes);
 		directory_start_block = dir_inode->dir.start_block;
 	} else {
 		SQUASHFS_SWAP_LDIR_INODE_HEADER(&dir_inode->ldir,
-			(squashfs_ldir_inode_header *) (*inode_table + bytes));
+			*inode_table + bytes);
 		directory_start_block = dir_inode->ldir.start_block;
 	}
 	get_uid(id_table[dir_inode->base.uid]);
 	get_guid(id_table[dir_inode->base.guid]);
 
 	for(cur_ptr = *inode_table; cur_ptr < *inode_table + bytes; files ++) {
-		SQUASHFS_SWAP_REG_INODE_HEADER(&inode,
-			(squashfs_reg_inode_header *) cur_ptr);
+		SQUASHFS_SWAP_REG_INODE_HEADER(&inode, cur_ptr);
 
 		TRACE("scan_inode_table: processing inode @ byte position "
-			"0x%x, type 0x%x\n", cur_ptr - *inode_table,
+			"0x%x, type 0x%x\n",
+			(unsigned int) (cur_ptr - *inode_table),
 			inode.inode_type);
 
 		get_uid(id_table[inode.uid]);
@@ -213,8 +206,7 @@ int scan_inode_table(int fd, long long start, long long end,
 				}
 
 				cur_ptr += sizeof(inode);
-				SQUASHFS_SWAP_INTS(block_list,
-					(unsigned int *) cur_ptr, blocks);
+				SQUASHFS_SWAP_INTS(block_list, cur_ptr, blocks);
 
 				*uncompressed_file += inode.file_size;
 				(*file_count) ++;
@@ -239,8 +231,7 @@ int scan_inode_table(int fd, long long start, long long end,
 				long long start;
 				unsigned int *block_list;
 
-				SQUASHFS_SWAP_LREG_INODE_HEADER(&inode,
-					(squashfs_lreg_inode_header *) cur_ptr);
+				SQUASHFS_SWAP_LREG_INODE_HEADER(&inode, cur_ptr);
 
 				frag_bytes = inode.fragment ==
 					SQUASHFS_INVALID_FRAG ? 0 :
@@ -265,8 +256,7 @@ int scan_inode_table(int fd, long long start, long long end,
 				}
 
 				cur_ptr += sizeof(inode);
-				SQUASHFS_SWAP_INTS(block_list,
-					(unsigned int *) cur_ptr, blocks);
+				SQUASHFS_SWAP_INTS(block_list, cur_ptr, blocks);
 
 				*uncompressed_file += inode.file_size;
 				(*file_count) ++;
@@ -285,9 +275,7 @@ int scan_inode_table(int fd, long long start, long long end,
 			case SQUASHFS_SYMLINK_TYPE: {
 				squashfs_symlink_inode_header inodep;
 	
-				SQUASHFS_SWAP_SYMLINK_INODE_HEADER(&inodep,
-					(squashfs_symlink_inode_header *)
-					cur_ptr);
+				SQUASHFS_SWAP_SYMLINK_INODE_HEADER(&inodep, cur_ptr);
 				(*sym_count) ++;
 				cur_ptr += sizeof(inodep) + inodep.symlink_size;
 				break;
@@ -295,8 +283,7 @@ int scan_inode_table(int fd, long long start, long long end,
 			case SQUASHFS_DIR_TYPE: {
 				squashfs_dir_inode_header dir_inode;
 
-				SQUASHFS_SWAP_DIR_INODE_HEADER(&dir_inode,
-					(squashfs_dir_inode_header *) cur_ptr);
+				SQUASHFS_SWAP_DIR_INODE_HEADER(&dir_inode, cur_ptr);
 				if(dir_inode.start_block < directory_start_block)
 					*uncompressed_directory +=
 					dir_inode.file_size;
@@ -308,8 +295,7 @@ int scan_inode_table(int fd, long long start, long long end,
 				squashfs_ldir_inode_header dir_inode;
 				int i;
 
-				SQUASHFS_SWAP_LDIR_INODE_HEADER(&dir_inode,
-					(squashfs_ldir_inode_header *) cur_ptr);
+				SQUASHFS_SWAP_LDIR_INODE_HEADER(&dir_inode, cur_ptr);
 				if(dir_inode.start_block < directory_start_block)
 					*uncompressed_directory +=
 					dir_inode.file_size;
@@ -318,8 +304,7 @@ int scan_inode_table(int fd, long long start, long long end,
 				for(i = 0; i < dir_inode.i_count; i++) {
 					squashfs_dir_index index;
 
-					SQUASHFS_SWAP_DIR_INDEX(&index,
-						(squashfs_dir_index *) cur_ptr);
+					SQUASHFS_SWAP_DIR_INDEX(&index, cur_ptr);
 					cur_ptr += sizeof(squashfs_dir_index) +
 						index.size + 1;
 				}
@@ -356,7 +341,7 @@ failed:
 }
 
 
-int read_super(int fd, squashfs_super_block *sBlk, char *source)
+struct compressor *read_super(int fd, squashfs_super_block *sBlk, char *source)
 {
 	read_destination(fd, SQUASHFS_START, sizeof(squashfs_super_block),
 		(char *) sBlk);
@@ -388,8 +373,18 @@ int read_super(int fd, squashfs_super_block *sBlk, char *source)
 		goto failed_mount;
 	}
 
+	/* Check the compression type */
+	comp = lookup_compressor_id(sBlk->compression);
+	if(!comp->supported) {
+		ERROR("Filesystem on %s uses %s compression, this is"
+			"unsupported by this version\n", source, comp->name);
+		display_compressors("", "");
+		goto failed_mount;
+	}
+
 	printf("Found a valid %sSQUASHFS superblock on %s.\n",
 		SQUASHFS_EXPORTABLE(sBlk->flags) ? "exportable " : "", source);
+	printf("\tCompression used %s\n", comp->name);
 	printf("\tInodes are %scompressed\n",
 		SQUASHFS_UNCOMPRESSED_INODES(sBlk->flags) ? "un" : "");
 	printf("\tData is %scompressed\n",
@@ -417,10 +412,10 @@ int read_super(int fd, squashfs_super_block *sBlk, char *source)
 	TRACE("sBlk->lookup_table_start %llx\n", sBlk->lookup_table_start);
 	printf("\n");
 
-	return TRUE;
+	return comp;
 
 failed_mount:
-	return FALSE;
+	return NULL;
 }
 
 
@@ -430,7 +425,8 @@ unsigned char *squashfs_readdir(int fd, int root_entries,
 	void (push_directory_entry)(char *, squashfs_inode, int, int))
 {
 	squashfs_dir_header dirh;
-	char buffer[sizeof(squashfs_dir_entry) + SQUASHFS_NAME_LEN + 1];
+	char buffer[sizeof(squashfs_dir_entry) + SQUASHFS_NAME_LEN + 1]
+		__attribute__ ((aligned));
 	squashfs_dir_entry *dire = (squashfs_dir_entry *) buffer;
 	unsigned char *directory_table = NULL;
 	int byte, bytes = 0, dir_count;
@@ -460,8 +456,7 @@ unsigned char *squashfs_readdir(int fd, int root_entries,
 
 	bytes = offset;
  	while(bytes < size) {			
-		SQUASHFS_SWAP_DIR_HEADER(&dirh,
-			(squashfs_dir_header *) (directory_table + bytes));
+		SQUASHFS_SWAP_DIR_HEADER(&dirh, directory_table + bytes);
 
 		dir_count = dirh.count + 1;
 		TRACE("squashfs_readdir: Read directory header @ byte position "
@@ -469,9 +464,7 @@ unsigned char *squashfs_readdir(int fd, int root_entries,
 		bytes += sizeof(dirh);
 
 		while(dir_count--) {
-			SQUASHFS_SWAP_DIR_ENTRY(dire,
-				(squashfs_dir_entry *)
-				(directory_table + bytes));
+			SQUASHFS_SWAP_DIR_ENTRY(dire, directory_table + bytes);
 			bytes += sizeof(*dire);
 
 			memcpy(dire->name, directory_table + bytes,
@@ -514,12 +507,17 @@ unsigned int *read_id_table(int fd, squashfs_super_block *sBlk)
 	SQUASHFS_INSWAP_ID_BLOCKS(index, indexes);
 
 	for(i = 0; i < indexes; i++) {
-		int length;
-		length = read_block(fd, index[i], NULL,
+		int length = read_block(fd, index[i], NULL,
 			((unsigned char *) id_table) +
 			(i * SQUASHFS_METADATA_SIZE), sBlk);
 		TRACE("Read id table block %d, from 0x%llx, length %d\n", i,
 			index[i], length);
+		if(length == 0) {
+			ERROR("Failed to read id table block %d, from 0x%llx, "
+				"length %d\n", i, index[i], length);
+			free(id_table);
+			return NULL;
+		}
 	}
 
 	SQUASHFS_INSWAP_INTS(id_table, sBlk->no_ids);
@@ -563,6 +561,13 @@ int read_fragment_table(int fd, squashfs_super_block *sBlk,
 			(i * SQUASHFS_METADATA_SIZE), sBlk);
 		TRACE("Read fragment table block %d, from 0x%llx, length %d\n",
 			i, fragment_table_index[i], length);
+		if(length == 0) {
+			ERROR("Failed to read fragment table block %d, from "
+				"0x%llx, length %d\n", i,
+				fragment_table_index[i], length);
+			free(*fragment_table);
+			return 0;
+		}
 	}
 
 	for(i = 0; i < sBlk->fragments; i++)
@@ -599,6 +604,13 @@ int read_inode_lookup_table(int fd, squashfs_super_block *sBlk,
 			(i * SQUASHFS_METADATA_SIZE), sBlk);
 		TRACE("Read inode lookup table block %d, from 0x%llx, length "
 			"%d\n", i, index[i], length);
+		if(length == 0) {
+			ERROR("Failed to read inode lookup table block %d, "
+				"from 0x%llx, length %d\n", i, index[i],
+				length);
+			free(*inode_lookup_table);
+			return 0;
+		}
 	}
 
 	SQUASHFS_INSWAP_LONG_LONGS(*inode_lookup_table, sBlk->inodes);

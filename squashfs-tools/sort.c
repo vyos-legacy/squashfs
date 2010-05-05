@@ -34,8 +34,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <squashfs_fs.h>
+#include "squashfs_fs.h"
 #include "global.h"
+#include "mksquashfs.h"
 #include "sort.h"
 
 #ifdef SQUASHFS_TRACE
@@ -140,8 +141,9 @@ re_read:
 			strncmp(path, "../", 3) == 0 || mkisofs_style == 1) {
 		if(lstat(path, &buf) == -1)
 			goto error;
-		TRACE("adding filename %s, priority %d, st_dev %llx, st_ino "
-			"%llx\n", path, priority, buf.st_dev, buf.st_ino);
+		TRACE("adding filename %s, priority %d, st_dev %d, st_ino "
+			"%lld\n", path, priority, (int) buf.st_dev,
+			(long long) buf.st_ino);
 		ADD_ENTRY(buf, priority);
 		return TRUE;
 	}
@@ -198,7 +200,7 @@ void generate_file_priorities(struct dir_info *dir, int priority,
 	while(dir->current_count < dir->count) {
 		struct dir_ent *dir_ent = dir->list[dir->current_count++];
 		struct stat *buf = &dir_ent->inode->buf;
-		if(dir_ent->data)
+		if(dir_ent->inode->root_entry)
 			continue;
 
 		switch(buf->st_mode & S_IFMT) {
@@ -254,6 +256,7 @@ void sort_files_and_write(struct dir_info *dir)
 				write_file(&inode, entry->dir, &duplicate_file);
 				INFO("file %s, uncompressed size %lld bytes %s"
 					"\n", entry->dir->pathname,
+					(long long)
 					entry->dir->inode->buf.st_size,
 					duplicate_file ? "DUPLICATE" : "");
 				entry->dir->inode->inode = inode;
@@ -261,6 +264,7 @@ void sort_files_and_write(struct dir_info *dir)
 			} else
 				INFO("file %s, uncompressed size %lld bytes "
 					"LINK\n", entry->dir->pathname,
+					(long long)
 					entry->dir->inode->buf.st_size);
 		}
 }

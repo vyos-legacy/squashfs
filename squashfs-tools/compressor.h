@@ -1,8 +1,4 @@
-#ifndef SORT_H 
-#define SORT_H
-
 /*
- * Squashfs
  *
  * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
  * Phillip Lougher <phillip@lougher.demon.co.uk>
@@ -21,11 +17,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * sort.h
+ * compressor.h
  */
 
-struct priority_entry {
-	struct dir_ent *dir;
-	struct priority_entry *next;
+struct compressor {
+	int (*compress)(void **, char *, char *, int, int, int *);
+	int (*uncompress)(char *, char *, int, int, int *);
+	int id;
+	char *name;
+	int supported;
 };
-#endif
+
+extern struct compressor *lookup_compressor(char *);
+extern struct compressor *lookup_compressor_id(int);
+extern void display_compressors(char *, char *);
