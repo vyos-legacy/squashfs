@@ -152,6 +152,17 @@ unsigned int xattr_bytes = 0, xattr_size = 0, total_xattr_bytes = 0;
 char *xattr_data_cache = NULL;
 unsigned xattr_cache_bytes = 0, xattr_cache_size = 0;
 
+struct cached_xattr {
+	unsigned int offset;
+	unsigned int size;
+	struct cached_xattr *next;
+};
+
+#define XATTR_HASH_SIZE		8192
+#define XATTR_HASH_MASK		(XATTR_HASH_SIZE - 1)
+#define XATTR_HASH(size)	(size & INODE_HASH_MASK)
+struct cached_xattr *xattr_hash[XATTR_HASH_SIZE];
+
 /* in memory inode table - possibly compressed */
 char *inode_table = NULL;
 unsigned int inode_bytes = 0, inode_size = 0, total_inode_bytes = 0;
@@ -1210,33 +1221,41 @@ unsigned int get_guid(unsigned int guid)
 	return entry->index;
 }
 
-int create_xattr(struct inode_info *inode)
+static unsigned int attr_size(const struct xattr_info *attr)
 {
-	struct xattr_info *attr;
-	struct squashfs_xattr_header header;
-	unsigned int start;
+	unsigned int bytes = 0;
+	
+	for (; attr; attr = attr->next)
+		bytes += sizeof(struct squashfs_xattr_entry)
+			+ strlen(attr->name) + attr->length;
+	return bytes;
+}
+
+/* This builds a new proposed entry in the xattr table 
+ * Actual entry is stored in cache but it maybe rejected later
+ */
+static struct cached_xattr *new_xattr_cache(const struct xattr_info *attr,
+					   unsigned int size)
+{
+	struct cached_xattr *xc_ent;
 	char *p;
 
-	if (inode->attribute == NULL)
-		return -1;
-
-	/* TODO: Add deduplication here */
-	header.size = sizeof(struct squashfs_xattr_header);
-	for (attr = inode->attribute; attr; attr = attr->next)
-		header.size += sizeof(struct squashfs_xattr_entry)
-			+ strlen(attr->name) + attr->length;
-
-	start = xattr_cache_bytes;
-	xattr_cache_bytes += header.size;
-	xattr_data_cache = realloc(xattr_data_cache, xattr_cache_bytes);
+	xattr_data_cache = realloc(xattr_data_cache, xattr_cache_bytes + size);
 	if (xattr_data_cache == NULL)
 		BAD_ERROR("Out of memory for xattr data cache reallocation\n");
 
-	p = xattr_data_cache + start;
-	SQUASHFS_SWAP_INTS(&header.size, p, 1);
-	p += sizeof(header);
+	if ((xc_ent = malloc(sizeof(struct cached_xattr))) == NULL)
+		BAD_ERROR("Out of memory for xattr cache entry\n");
 
-	for (attr = inode->attribute; attr; attr = attr->next) {
+	xc_ent->offset = xattr_cache_bytes;
+	xc_ent->size = size;
+	xc_ent->next = NULL;
+
+	p = xattr_data_cache + xattr_cache_bytes;
+	SQUASHFS_SWAP_INTS(&size, p, 1);
+	p += sizeof(size);
+
+	for (; attr; attr = attr->next) {
 		struct squashfs_xattr_entry entry;
 
 		entry.name_len = strlen(attr->name);
@@ -1251,7 +1270,38 @@ int create_xattr(struct inode_info *inode)
 		p += entry.value_len;
 	}
 
-	return start;
+	return xc_ent;
+}
+
+int create_xattr(const struct inode_info *inode)
+{
+	struct cached_xattr *new, *orig, **prev;
+	unsigned int size, h;
+
+	if(inode->attribute == NULL)
+		return -1;
+
+	size = sizeof(struct squashfs_xattr_header) 
+		+ attr_size(inode->attribute);
+
+	new = new_xattr_cache(inode->attribute, size);
+	h = XATTR_HASH(size);
+	for (prev = &xattr_hash[h]; (orig = *prev); prev = &orig->next) {
+		if (orig->size != size)
+			continue;
+		/* Found a duplicate entry? */
+		if (memcmp(xattr_data_cache + orig->offset,
+			   xattr_data_cache + new->offset, size) == 0) {
+			free(new);
+			return orig->offset;
+		}
+	}
+
+	/* This is a new value, commit it */
+	xattr_cache_bytes += size;
+	*prev = new;
+
+	return new->offset;
 }
 
 int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
