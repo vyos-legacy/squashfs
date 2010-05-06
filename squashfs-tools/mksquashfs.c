@@ -152,16 +152,16 @@ unsigned int xattr_bytes = 0, xattr_size = 0, total_xattr_bytes = 0;
 char *xattr_data_cache = NULL;
 unsigned xattr_cache_bytes = 0, xattr_cache_size = 0;
 
-struct cached_xattr {
+struct xattr_cache_index {
 	unsigned int offset;
 	unsigned int size;
-	struct cached_xattr *next;
+	struct xattr_cache_index *next;
 };
 
 #define XATTR_HASH_SIZE		8192
 #define XATTR_HASH_MASK		(XATTR_HASH_SIZE - 1)
 #define XATTR_HASH(size)	(size & INODE_HASH_MASK)
-struct cached_xattr *xattr_hash[XATTR_HASH_SIZE];
+struct xattr_cache_index *xattr_hash[XATTR_HASH_SIZE];
 
 /* in memory inode table - possibly compressed */
 char *inode_table = NULL;
@@ -1234,18 +1234,28 @@ static unsigned int attr_size(const struct xattr_info *attr)
 /* This builds a new proposed entry in the xattr table 
  * Actual entry is stored in cache but it maybe rejected later
  */
-static struct cached_xattr *new_xattr_cache(const struct xattr_info *attr,
-					   unsigned int size)
+static struct xattr_cache_index *new_xattr_cache(const struct xattr_info *attr,
+						 unsigned int size)
 {
-	struct cached_xattr *xc_ent;
+	struct xattr_cache_index *xc_ent;
+	int data_space = xattr_cache_size - xattr_cache_bytes;
 	char *p;
 
-	xattr_data_cache = realloc(xattr_data_cache, xattr_cache_bytes + size);
-	if (xattr_data_cache == NULL)
-		BAD_ERROR("Out of memory for xattr data cache reallocation\n");
+	if (data_space < size) {
+		int realloc_size = xattr_cache_size > 0 ? size - data_space :
+			((size + SQUASHFS_METADATA_SIZE) & 
+			 ~(SQUASHFS_METADATA_SIZE - 1));
 
-	if ((xc_ent = malloc(sizeof(struct cached_xattr))) == NULL)
-		BAD_ERROR("Out of memory for xattr cache entry\n");
+		xattr_data_cache = realloc(xattr_data_cache,
+			xattr_cache_size + realloc_size);
+		if(xattr_data_cache == NULL)
+			BAD_ERROR("Out of memory for xattr data cache"
+				  " reallocation\n");
+		xattr_cache_size += realloc_size;
+	}
+
+	if ((xc_ent = malloc(sizeof(struct xattr_cache_index))) == NULL)
+		BAD_ERROR("Out of memory for cache index entry\n");
 
 	xc_ent->offset = xattr_cache_bytes;
 	xc_ent->size = size;
@@ -1275,7 +1285,7 @@ static struct cached_xattr *new_xattr_cache(const struct xattr_info *attr,
 
 int create_xattr(const struct inode_info *inode)
 {
-	struct cached_xattr *new, *orig, **prev;
+	struct xattr_cache_index *new, *orig, **prev;
 	unsigned int size, h;
 
 	if(inode->attribute == NULL)
