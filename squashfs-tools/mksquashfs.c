@@ -300,7 +300,7 @@ long long sbytes, stotal_bytes;
 
 unsigned int sinode_bytes, scache_bytes, sdirectory_bytes,
 	sdirectory_cache_bytes, sdirectory_compressed_bytes,
-	stotal_inode_bytes, stotal_directory_bytes,
+	stotal_inode_bytes, stotal_directory_bytes, stotal_xattr_bytes,
 	sxattr_bytes, sxattr_cache_bytes,
 	sinode_count = 0, sfile_count, ssym_count, sdev_count,
 	sdir_count, sfifo_count, ssock_count, sdup_files;
@@ -778,6 +778,7 @@ void restorefs()
 	total_bytes = stotal_bytes;
 	total_inode_bytes = stotal_inode_bytes;
 	total_directory_bytes = stotal_directory_bytes;
+	total_xattr_bytes = stotal_xattr_bytes;
 	inode_count = sinode_count;
 	file_count = sfile_count;
 	sym_count = ssym_count;
@@ -1225,7 +1226,7 @@ static unsigned int attr_size(const struct xattr_info *attr)
 {
 	unsigned int bytes = 0;
 	
-	for (; attr; attr = attr->next)
+	for(; attr; attr = attr->next)
 		bytes += sizeof(struct squashfs_xattr_entry)
 			+ strlen(attr->name) + attr->length;
 	return bytes;
@@ -1241,7 +1242,7 @@ static struct xattr_cache_index *new_xattr_cache(const struct xattr_info *attr,
 	int data_space = xattr_cache_size - xattr_cache_bytes;
 	char *p;
 
-	if (data_space < size) {
+	if(data_space < size) {
 		int realloc_size = xattr_cache_size > 0 ? size - data_space :
 			((size + SQUASHFS_METADATA_SIZE) & 
 			 ~(SQUASHFS_METADATA_SIZE - 1));
@@ -1254,7 +1255,7 @@ static struct xattr_cache_index *new_xattr_cache(const struct xattr_info *attr,
 		xattr_cache_size += realloc_size;
 	}
 
-	if ((xc_ent = malloc(sizeof(struct xattr_cache_index))) == NULL)
+	if((xc_ent = malloc(sizeof(struct xattr_cache_index))) == NULL)
 		BAD_ERROR("Out of memory for cache index entry\n");
 
 	xc_ent->offset = xattr_cache_bytes;
@@ -1265,7 +1266,7 @@ static struct xattr_cache_index *new_xattr_cache(const struct xattr_info *attr,
 	SQUASHFS_SWAP_INTS(&size, p, 1);
 	p += sizeof(size);
 
-	for (; attr; attr = attr->next) {
+	for(; attr; attr = attr->next) {
 		struct squashfs_xattr_entry entry;
 
 		entry.name_len = strlen(attr->name);
@@ -1296,11 +1297,11 @@ int create_xattr(const struct inode_info *inode)
 
 	new = new_xattr_cache(inode->attribute, size);
 	h = XATTR_HASH(size);
-	for (prev = &xattr_hash[h]; (orig = *prev); prev = &orig->next) {
-		if (orig->size != size)
+	for(prev = &xattr_hash[h]; (orig = *prev); prev = &orig->next) {
+		if(orig->size != size)
 			continue;
 		/* Found a duplicate entry? */
-		if (memcmp(xattr_data_cache + orig->offset,
+		if(memcmp(xattr_data_cache + orig->offset,
 			   xattr_data_cache + new->offset, size) == 0) {
 			free(new);
 			return orig->offset;
@@ -1413,6 +1414,7 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 		dir->offset = offset;
 		dir->start_block = start_block;
 		dir->i_count = i_count;
+		dir->xattr = xattr;
 		dir->parent_inode = dir_ent->our_dir ?
 			dir_ent->our_dir->dir_ent->inode->inode_number :
 			dir_inode_no + inode_no;
@@ -3276,34 +3278,34 @@ struct xattr_info *lookup_xattr(const char *path)
 	const char *cp;
 	ssize_t len;
 
-	if (path == NULL)
+	if(path == NULL)
 		return NULL;
 
 	len = llistxattr(path, NULL, 0);
-	if (len <= 0)
+	if(len <= 0)
 		return NULL;
 
 	char buf[len];
 
 	len = llistxattr(path, buf, len);
-	if (len <= 0) {
+	if(len <= 0) {
 		ERROR("Cannot get listxattr %s because %s, ignoring",
 		      path, strerror(errno));
 		return NULL;
 	}
 
-	for (cp = buf; cp < buf + len; cp += strlen(cp) + 1) {
+	for(cp = buf; cp < buf + len; cp += strlen(cp) + 1) {
 		struct xattr_info *info;
 		int value_len;
 
-		if ((value_len = lgetxattr(path, cp, NULL, 0)) < 0) {
+		if((value_len = lgetxattr(path, cp, NULL, 0)) < 0) {
 			ERROR("Cannot getxattr %s(%s) because %s, ignoring",
 			      path, cp, strerror(errno));
 			break;
 		}
 
 		info = malloc(sizeof(struct xattr_info) + value_len);
-		if (info == NULL || (info->name = strdup(cp)) == NULL)
+		if(info == NULL || (info->name = strdup(cp)) == NULL)
 			BAD_ERROR("Out of memory for xattr info allocation\n");
 
 		info->length = lgetxattr(path, info->name,
@@ -3339,8 +3341,7 @@ struct inode_info *lookup_inode(struct stat *buf, const char *pathname)
 	inode->pseudo_file = FALSE;
 	inode->inode = SQUASHFS_INVALID_BLK;
 	inode->nlink = 1;
-	if (pathname)
-		inode->attribute = lookup_xattr(pathname);
+	inode->attribute = lookup_xattr(pathname);
 
 	if((buf->st_mode & S_IFMT) == S_IFREG)
 		estimated_uncompressed += (buf->st_size + block_size - 1) >>
@@ -5069,6 +5070,7 @@ printOptions:
 		stotal_inode_bytes = total_inode_bytes;
 		stotal_directory_bytes = total_directory_bytes +
 			compressed_data;
+		stotal_xattr_bytes = total_xattr_bytes;
 		sfile_count = file_count;
 		ssym_count = sym_count;
 		sdev_count = dev_count;
@@ -5261,9 +5263,11 @@ restore_filesystem:
 
 	printf("Extended Attributes table size %d bytes (%.2f Kbytes)\n",
 	       xattr_bytes, xattr_bytes / 1024.0);
-	printf("\t%.2f%% of uncompressed attribute table size (%d bytes)\n",
-		((float) xattr_bytes / total_xattr_bytes) * 100.0,
-		total_xattr_bytes);
+
+	if(total_xattr_bytes > 0) 
+		printf("\t%.2f%% of uncompressed attribute table size (%d bytes)\n",
+		       ((float) xattr_bytes / total_xattr_bytes) * 100.0,
+		       total_xattr_bytes);
 
 	if(duplicate_checking)
 		printf("Number of duplicate files found %d\n", file_count -
