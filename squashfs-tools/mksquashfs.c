@@ -1105,7 +1105,8 @@ long long write_id_table()
 
 	TRACE("write_id_table: ids %d, id_bytes %d\n", id_count, id_bytes);
 	for(i = 0; i < id_count; i++) {
-		TRACE("write_id_table: id index %d, id %d", i, id_table[i]->id);
+		TRACE("write_id_table: id index %d, id %d\n",
+		      i, id_table[i]->id);
 		SQUASHFS_SWAP_INTS(&id_table[i]->id, p + i, 1);
 	}
 
@@ -1139,6 +1140,7 @@ long long write_xattr_table()
 			SQUASHFS_METADATA_SIZE : xattr_cache_bytes;
 		c_byte = mangle(xattr_table + xattr_bytes +
 			BLOCK_OFFSET, xattrp, avail_bytes,
+
 			SQUASHFS_METADATA_SIZE, noI, 0);
 		TRACE("Xattr block @ 0x%x, size %d\n", xattr_bytes,
 			c_byte);
@@ -1284,13 +1286,13 @@ static struct xattr_cache_index *new_xattr_cache(const struct xattr_info *attr,
 	return xc_ent;
 }
 
-int create_xattr(const struct inode_info *inode)
+unsigned int create_xattr(const struct inode_info *inode)
 {
 	struct xattr_cache_index *new, *orig, **prev;
 	unsigned int size, h;
 
 	if(inode->attribute == NULL)
-		return -1;
+		return SQUASHFS_INVALID_FRAG;
 
 	size = sizeof(struct squashfs_xattr_header) 
 		+ attr_size(inode->attribute);
@@ -1298,17 +1300,22 @@ int create_xattr(const struct inode_info *inode)
 	new = new_xattr_cache(inode->attribute, size);
 	h = XATTR_HASH(size);
 	for(prev = &xattr_hash[h]; (orig = *prev); prev = &orig->next) {
-		if(orig->size != size)
+		if(orig->size != new->size)
 			continue;
 		/* Found a duplicate entry? */
 		if(memcmp(xattr_data_cache + orig->offset,
 			   xattr_data_cache + new->offset, size) == 0) {
 			free(new);
+			TRACE("\tXattr size %u offset %u:\n", 
+			      orig->size, orig->offset);
 			return orig->offset;
 		}
 	}
 
 	/* This is a new value, commit it */
+	TRACE("\tCreate xattr size %u offset %u\n",
+	      new->size, new->offset);
+
 	xattr_cache_bytes += size;
 	*prev = new;
 
@@ -1326,18 +1333,18 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 	void *inode;
 	char *filename = dir_ent->pathname;
 	int nlink = dir_ent->inode->nlink;
-	int xattr = create_xattr(dir_ent->inode);
+	unsigned int xattr = create_xattr(dir_ent->inode);
 	int inode_number = type == SQUASHFS_DIR_TYPE ?
 		dir_ent->inode->inode_number :
 		dir_ent->inode->inode_number + dir_inode_no;
 
 	if(type == SQUASHFS_DIR_TYPE &&
-			(dir_info->dir_is_ldir || xattr != -1))
+			(dir_info->dir_is_ldir || xattr != SQUASHFS_INVALID_FRAG))
 		type = SQUASHFS_LDIR_TYPE;
 
 	if(type == SQUASHFS_FILE_TYPE &&
 			(dir_ent->inode->nlink > 1 ||
-			 xattr != -1 ||
+			 xattr != SQUASHFS_INVALID_FRAG ||
 			 byte_size >= (1LL << 32) ||
 			 start_block >= (1LL << 32) ||
 			 sparse))
