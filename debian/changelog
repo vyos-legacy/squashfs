@@ -1,3 +1,20 @@
+squashfs (4.0+vyatta-3) unstable; urgency=low
+
+  * Merge in upstream 4.0 source
+  * Merge in Squashfs 4.0 (upstream)
+  * Update upstream author email
+  * remove old README
+  * Update to latest Squashfs tools
+  * Update README to current
+  * Pass default compression in as part of build
+  * Experimental support for xattr in mksquashfs
+  * Add deduplication for extended attributes
+  * Avoid reallocating on each extended attribute
+  * Fix some xattr issues
+  * Handle xattr offset flag correctly
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Tue, 11 May 2010 10:36:20 -0700
+
 squashfs (4.0+vyatta-2) unstable; urgency=low
 
   [ Stephen Hemminger ]
