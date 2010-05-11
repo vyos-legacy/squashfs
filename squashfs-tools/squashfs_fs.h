@@ -277,15 +277,36 @@ struct squashfs_ipc_inode_header {
 	unsigned int		nlink;
 };
 
+struct squashfs_lipc_inode_header {
+	SQUASHFS_BASE_INODE_HEADER;
+	unsigned int		nlink;
+	unsigned int		xattr;
+};
+
 struct squashfs_dev_inode_header {
 	SQUASHFS_BASE_INODE_HEADER;
 	unsigned int		nlink;
 	unsigned int		rdev;
 };
 	
+struct squashfs_ldev_inode_header {
+	SQUASHFS_BASE_INODE_HEADER;
+	unsigned int		nlink;
+	unsigned int		rdev;
+	unsigned int		xattr;
+};
+
 struct squashfs_symlink_inode_header {
 	SQUASHFS_BASE_INODE_HEADER;
 	unsigned int		nlink;
+	unsigned int		symlink_size;
+	char			symlink[0];
+};
+
+struct squashfs_lsymlink_inode_header {
+	SQUASHFS_BASE_INODE_HEADER;
+	unsigned int		nlink;
+	unsigned int		xattr;
 	unsigned int		symlink_size;
 	char			symlink[0];
 };
@@ -335,12 +356,15 @@ struct squashfs_ldir_inode_header {
 union squashfs_inode_header {
 	struct squashfs_base_inode_header	base;
 	struct squashfs_dev_inode_header	dev;
+	struct squashfs_ldev_inode_header	ldev;
 	struct squashfs_symlink_inode_header	symlink;
+	struct squashfs_lsymlink_inode_header	lsymlink;
 	struct squashfs_reg_inode_header	reg;
 	struct squashfs_lreg_inode_header	lreg;
 	struct squashfs_dir_inode_header	dir;
 	struct squashfs_ldir_inode_header	ldir;
 	struct squashfs_ipc_inode_header	ipc;
+	struct squashfs_lipc_inode_header	lipc;
 };
 	
 struct squashfs_dir_entry {

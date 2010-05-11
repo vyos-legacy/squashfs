@@ -1332,23 +1332,46 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 	squashfs_base_inode_header *base = &inode_header.base;
 	void *inode;
 	char *filename = dir_ent->pathname;
+	int i;
 	int nlink = dir_ent->inode->nlink;
 	unsigned int xattr = create_xattr(dir_ent->inode);
 	int inode_number = type == SQUASHFS_DIR_TYPE ?
 		dir_ent->inode->inode_number :
 		dir_ent->inode->inode_number + dir_inode_no;
 
-	if(type == SQUASHFS_DIR_TYPE &&
-			(dir_info->dir_is_ldir || xattr != SQUASHFS_INVALID_FRAG))
-		type = SQUASHFS_LDIR_TYPE;
-
-	if(type == SQUASHFS_FILE_TYPE &&
-			(dir_ent->inode->nlink > 1 ||
-			 xattr != SQUASHFS_INVALID_FRAG ||
-			 byte_size >= (1LL << 32) ||
-			 start_block >= (1LL << 32) ||
-			 sparse))
-		type = SQUASHFS_LREG_TYPE;
+	/* Upscale type if necessary */
+	switch(type) {
+	case SQUASHFS_DIR_TYPE:
+		if(dir_info->dir_is_ldir || xattr != SQUASHFS_INVALID_FRAG)
+			type = SQUASHFS_LDIR_TYPE;
+		break;
+	case SQUASHFS_FILE_TYPE:
+		if(dir_ent->inode->nlink > 1 || xattr != SQUASHFS_INVALID_FRAG ||
+		   byte_size >= (1LL << 32) || start_block >= (1LL << 32) ||
+		   sparse)
+			type = SQUASHFS_LREG_TYPE;
+		break;
+	case SQUASHFS_SYMLINK_TYPE:
+		if (xattr != SQUASHFS_INVALID_FRAG)
+			type = SQUASHFS_LSYMLINK_TYPE;
+		break;
+	case SQUASHFS_BLKDEV_TYPE:
+		if (xattr != SQUASHFS_INVALID_FRAG)
+			type = SQUASHFS_LBLKDEV_TYPE;
+		break;
+	case SQUASHFS_CHRDEV_TYPE:
+		if (xattr != SQUASHFS_INVALID_FRAG)
+			type = SQUASHFS_LCHRDEV_TYPE;
+		break;
+	case SQUASHFS_FIFO_TYPE:
+		if (xattr != SQUASHFS_INVALID_FRAG)
+			type = SQUASHFS_LFIFO_TYPE;
+		break;
+	case SQUASHFS_SOCKET_TYPE:
+		if (xattr != SQUASHFS_INVALID_FRAG)
+			type = SQUASHFS_LSOCKET_TYPE;
+		break;
+	}
 
 	base->mode = SQUASHFS_MODE(buf->st_mode);
 	base->uid = get_uid((unsigned int) global_uid == -1 ?
@@ -1359,8 +1382,8 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 	base->mtime = buf->st_mtime;
 	base->inode_number = inode_number;
 
-	if(type == SQUASHFS_FILE_TYPE) {
-		int i;
+	switch(type) {
+	case SQUASHFS_FILE_TYPE: {
 		squashfs_reg_inode_header *reg = &inode_header.reg;
 		size_t off = offsetof(squashfs_reg_inode_header, block_list);
 
@@ -1377,9 +1400,9 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 			fragment->size);
 		for(i = 0; i < offset; i++)
 			TRACE("Block %d, size %d\n", i, block_list[i]);
+		break;
 	}
-	else if(type == SQUASHFS_LREG_TYPE) {
-		int i;
+	case SQUASHFS_LREG_TYPE: {
 		squashfs_lreg_inode_header *reg = &inode_header.lreg;
 		size_t off = offsetof(squashfs_lreg_inode_header, block_list);
 
@@ -1402,9 +1425,9 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 			fragment->offset, fragment->size, nlink);
 		for(i = 0; i < offset; i++)
 			TRACE("Block %d, size %d\n", i, block_list[i]);
+		break;
 	}
-	else if(type == SQUASHFS_LDIR_TYPE) {
-		int i;
+	case SQUASHFS_LDIR_TYPE: {
 		unsigned char *p;
 		squashfs_ldir_inode_header *dir = &inode_header.ldir;
 		struct cached_dir_index *index = dir_in->index;
@@ -1437,8 +1460,9 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 		TRACE("Long directory inode, file_size %lld, start_block "
 			"0x%llx, offset 0x%x, nlink %d\n", byte_size,
 			start_block, offset, dir_ent->dir->directory_count + 2);
+		break;
 	}
-	else if(type == SQUASHFS_DIR_TYPE) {
+	case SQUASHFS_DIR_TYPE: {
 		squashfs_dir_inode_header *dir = &inode_header.dir;
 
 		inode = get_inode(sizeof(*dir));
@@ -1453,8 +1477,10 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 		TRACE("Directory inode, file_size %lld, start_block 0x%llx, "
 			"offset 0x%x, nlink %d\n", byte_size, start_block,
 			offset, dir_ent->dir->directory_count + 2);
+		break;
 	}
-	else if(type == SQUASHFS_CHRDEV_TYPE || type == SQUASHFS_BLKDEV_TYPE) {
+	case SQUASHFS_CHRDEV_TYPE:
+	case SQUASHFS_BLKDEV_TYPE: {
 		squashfs_dev_inode_header *dev = &inode_header.dev;
 		unsigned int major = major(buf->st_rdev);
 		unsigned int minor = minor(buf->st_rdev);
@@ -1477,8 +1503,36 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 				((minor & ~0xff) << 12);
 		SQUASHFS_SWAP_DEV_INODE_HEADER(dev, inode);
 		TRACE("Device inode, rdev 0x%x, nlink %d\n", dev->rdev, nlink);
+		break;
 	}
-	else if(type == SQUASHFS_SYMLINK_TYPE) {
+	case SQUASHFS_LBLKDEV_TYPE:
+	case SQUASHFS_LCHRDEV_TYPE: {
+		squashfs_ldev_inode_header *dev = &inode_header.ldev;
+		unsigned int major = major(buf->st_rdev);
+		unsigned int minor = minor(buf->st_rdev);
+
+		if(major > 0xfff) {
+			ERROR("Major %d out of range in device node %s, "
+				"truncating to %d\n", major, filename,
+				major & 0xfff);
+			major &= 0xfff;
+		}
+		if(minor > 0xfffff) {
+			ERROR("Minor %d out of range in device node %s, "
+				"truncating to %d\n", minor, filename,
+				minor & 0xfffff);
+			minor &= 0xfffff;
+		}
+		inode = get_inode(sizeof(*dev));
+		dev->nlink = nlink;
+		dev->rdev = (major << 8) | (minor & 0xff) |
+				((minor & ~0xff) << 12);
+		dev->xattr = xattr;
+		SQUASHFS_SWAP_DEV_INODE_HEADER(dev, inode);
+		TRACE("Device inode, rdev 0x%x, nlink %d\n", dev->rdev, nlink);
+		break;
+	}
+	case SQUASHFS_SYMLINK_TYPE: {
 		squashfs_symlink_inode_header *symlink = &inode_header.symlink;
 		int byte;
 		char buff[65536];
@@ -1503,17 +1557,64 @@ int create_inode(squashfs_inode *i_no, struct dir_info *dir_info,
 		strncpy(inode + off, buff, byte);
 		TRACE("Symbolic link inode, symlink_size %d, nlink %d\n", byte,
 			nlink);
+		break;
 	}
-	else if(type == SQUASHFS_FIFO_TYPE || type == SQUASHFS_SOCKET_TYPE) {
+	case SQUASHFS_LSYMLINK_TYPE: {
+		squashfs_lsymlink_inode_header *symlink = &inode_header.lsymlink;
+		int byte;
+		char buff[65536];
+		size_t off = offsetof(squashfs_symlink_inode_header, symlink);
+
+		if((byte = readlink(filename, buff, 65536)) == -1) {
+			ERROR("Failed to read symlink %s, creating empty "
+				"symlink\n", filename);
+			byte = 0;
+		}
+
+		if(byte == 65536) {
+			ERROR("Symlink %s is greater than 65536 bytes! "
+				"Creating empty symlink\n", filename);
+			byte = 0;
+		}
+
+		inode = get_inode(sizeof(*symlink) + byte);
+		symlink->nlink = nlink;
+		symlink->symlink_size = byte;
+		symlink->xattr = xattr;
+		SQUASHFS_SWAP_SYMLINK_INODE_HEADER(symlink, inode);
+		strncpy(inode + off, buff, byte);
+		TRACE("Symbolic link inode, symlink_size %d, nlink %d\n", byte,
+			nlink);
+		break;
+	}
+	case SQUASHFS_FIFO_TYPE:
+	case SQUASHFS_SOCKET_TYPE: {
 		squashfs_ipc_inode_header *ipc = &inode_header.ipc;
 
 		inode = get_inode(sizeof(*ipc));
 		ipc->nlink = nlink;
+
 		SQUASHFS_SWAP_IPC_INODE_HEADER(ipc, inode);
 		TRACE("ipc inode, type %s, nlink %d\n", type ==
 			SQUASHFS_FIFO_TYPE ? "fifo" : "socket", nlink);
-	} else
+		break;
+	}
+	case SQUASHFS_LFIFO_TYPE:
+	case SQUASHFS_LSOCKET_TYPE: {
+		squashfs_lipc_inode_header *ipc = &inode_header.lipc;
+
+		inode = get_inode(sizeof(*ipc));
+		ipc->nlink = nlink;
+		ipc->xattr = xattr;
+
+		SQUASHFS_SWAP_IPC_INODE_HEADER(ipc, inode);
+		TRACE("ipc inode, type %s, nlink %d\n", type ==
+			SQUASHFS_FIFO_TYPE ? "fifo" : "socket", nlink);
+		break;
+	}
+	default:
 		BAD_ERROR("Unrecognised inode %d in create_inode\n", type);
+	}
 
 	*i_no = MKINODE(inode);
 	inode_count ++;
