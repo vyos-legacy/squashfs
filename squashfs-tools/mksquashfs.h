@@ -67,20 +67,11 @@ struct inode_info {
 	unsigned int		inode_number;
 	unsigned int		nlink;
 	int			pseudo_id;
-	struct xattr_info	*attribute;
 	char			type;
 	char			read;
 	char			root_entry;
 	char			pseudo_file;
 };
-
-struct xattr_info {
-	char			*name;
-	struct xattr_info	*next;
-	unsigned int		length;
-	unsigned char		value[0];
-};
-
 #endif
 
 #define PSEUDO_FILE_OTHER	1
@@ -89,3 +80,7 @@ struct xattr_info {
 #define IS_PSEUDO(a)		((a)->pseudo_file)
 #define IS_PSEUDO_PROCESS(a)	((a)->pseudo_file & PSEUDO_FILE_PROCESS)
 #define IS_PSEUDO_OTHER(a)	((a)->pseudo_file & PSEUDO_FILE_OTHER)
+
+/* offset of data in compressed metadata blocks (allowing room for
+ * compressed size */
+#define BLOCK_OFFSET 2
