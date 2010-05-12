@@ -1,3 +1,10 @@
+squashfs (4.0+vyatta-4) UNRELEASED; urgency=low
+
+  * Merge in upstream (plougher) version of squashfs that
+    supports xattr
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Wed, 12 May 2010 11:58:17 -0700
+
 squashfs (4.0+vyatta-3) unstable; urgency=low
 
   * Merge in upstream 4.0 source
