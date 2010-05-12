@@ -48,6 +48,7 @@
 
 #define SQUASHFS_INVALID		((long long) 0xffffffffffff)
 #define SQUASHFS_INVALID_FRAG		((unsigned int) 0xffffffff)
+#define SQUASHFS_INVALID_XATTR		((unsigned int) 0xffffffff)
 #define SQUASHFS_INVALID_BLK		((long long) -1)
 #define SQUASHFS_USED_BLK		((long long) -2)
 
@@ -104,6 +105,13 @@
 #define SQUASHFS_LCHRDEV_TYPE		12
 #define SQUASHFS_LFIFO_TYPE		13
 #define SQUASHFS_LSOCKET_TYPE		14
+
+/* Xattr types */
+#define SQUASHFS_XATTR_USER		0
+#define SQUASHFS_XATTR_TRUSTED		1
+#define SQUASHFS_XATTR_SECURITY		2
+#define SQUASHFS_XATTR_VALUE_OOL	256
+#define SQUASHFS_XATTR_PREFIX_MASK	0xff
 
 /* Flag whether block is compressed or uncompressed, bit is set if block is
  * uncompressed */
@@ -246,7 +254,7 @@ struct squashfs_super_block {
 	squashfs_inode_t	root_inode;
 	long long		bytes_used;
 	long long		id_table_start;
-	long long		xattr_table_start;
+	long long		xattr_id_table_start;
 	long long		inode_table_start;
 	long long		directory_table_start;
 	long long		fragment_table_start;
@@ -277,12 +285,6 @@ struct squashfs_ipc_inode_header {
 	unsigned int		nlink;
 };
 
-struct squashfs_lipc_inode_header {
-	SQUASHFS_BASE_INODE_HEADER;
-	unsigned int		nlink;
-	unsigned int		xattr;
-};
-
 struct squashfs_dev_inode_header {
 	SQUASHFS_BASE_INODE_HEADER;
 	unsigned int		nlink;
@@ -295,18 +297,10 @@ struct squashfs_ldev_inode_header {
 	unsigned int		rdev;
 	unsigned int		xattr;
 };
-
+	
 struct squashfs_symlink_inode_header {
 	SQUASHFS_BASE_INODE_HEADER;
 	unsigned int		nlink;
-	unsigned int		symlink_size;
-	char			symlink[0];
-};
-
-struct squashfs_lsymlink_inode_header {
-	SQUASHFS_BASE_INODE_HEADER;
-	unsigned int		nlink;
-	unsigned int		xattr;
 	unsigned int		symlink_size;
 	char			symlink[0];
 };
@@ -358,13 +352,11 @@ union squashfs_inode_header {
 	struct squashfs_dev_inode_header	dev;
 	struct squashfs_ldev_inode_header	ldev;
 	struct squashfs_symlink_inode_header	symlink;
-	struct squashfs_lsymlink_inode_header	lsymlink;
 	struct squashfs_reg_inode_header	reg;
 	struct squashfs_lreg_inode_header	lreg;
 	struct squashfs_dir_inode_header	dir;
 	struct squashfs_ldir_inode_header	ldir;
 	struct squashfs_ipc_inode_header	ipc;
-	struct squashfs_lipc_inode_header	lipc;
 };
 	
 struct squashfs_dir_entry {
@@ -388,13 +380,26 @@ struct squashfs_fragment_entry {
 };
 
 struct squashfs_xattr_entry {
-	unsigned int		name_len;
-	unsigned int		value_len;
-	char			name_and_value_data[0];
+	unsigned short		type;
+	unsigned short		size;
+	char			data[0];
 };
 
-struct squashfs_xattr_header {
+struct squashfs_xattr_val {
+	unsigned int		vsize;
+	char			value[0];
+};
+
+struct squashfs_xattr_id {
+	long long		xattr;
+	unsigned int		count;
 	unsigned int		size;
+};
+
+struct squashfs_xattr_table {
+	long long		xattr_table_start;
+	unsigned int		xattr_ids;
+	unsigned int		unused;
 };
 
 #endif
