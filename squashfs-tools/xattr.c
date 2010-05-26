@@ -72,7 +72,7 @@ static struct xattr_list *dupl[65536];
 static struct dupl_id *dupl_id[65536];
 
 /* file system globals from mksquashfs.c */
-extern int noI;
+extern int no_xattrs, noX;
 extern long long bytes;
 extern int fd;
 
@@ -250,7 +250,7 @@ static void *get_xattr_space(unsigned int req_size, long long *disk)
 
 		c_byte = mangle(xattr_table + xattr_bytes + BLOCK_OFFSET,
 			data_cache, SQUASHFS_METADATA_SIZE,
-			SQUASHFS_METADATA_SIZE, noI, 0);
+			SQUASHFS_METADATA_SIZE, noX, 0);
 		TRACE("Xattr block @ 0x%x, size %d\n", xattr_bytes, c_byte);
 		SQUASHFS_SWAP_SHORTS(&c_byte, xattr_table + xattr_bytes, 1);
 		xattr_bytes += SQUASHFS_COMPRESSED_SIZE(c_byte) + BLOCK_OFFSET;
@@ -432,7 +432,7 @@ long long write_xattrs()
 		avail_bytes = cache_bytes > SQUASHFS_METADATA_SIZE ?
 			SQUASHFS_METADATA_SIZE : cache_bytes;
 		c_byte = mangle(xattr_table + xattr_bytes + BLOCK_OFFSET, datap,
-			avail_bytes, SQUASHFS_METADATA_SIZE, noI, 0);
+			avail_bytes, SQUASHFS_METADATA_SIZE, noX, 0);
 		TRACE("Xattr block @ 0x%x, size %d\n", xattr_bytes, c_byte);
 		SQUASHFS_SWAP_SHORTS(&c_byte, xattr_table + xattr_bytes, 1);
 		xattr_bytes += SQUASHFS_COMPRESSED_SIZE(c_byte) + BLOCK_OFFSET;
@@ -477,7 +477,7 @@ int read_xattrs(struct dir_ent *dir_ent)
 	long long xattr_disk;
 	struct dupl_id *xattr_dupl;
 
-	if(IS_PSEUDO(inode) || inode->root_entry)
+	if(no_xattrs || IS_PSEUDO(inode) || inode->root_entry)
 		return SQUASHFS_INVALID_XATTR;
 
 	xattrs = read_xattrs_from_system(filename, &xattr_list);
