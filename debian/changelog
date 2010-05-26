@@ -1,3 +1,23 @@
+squashfs (4.0+vyatta-5) unstable; urgency=low
+
+  [ plougher ]
+  *  xattrs, add support for ipc inodes (fifos and sockets)
+  * Fix unknown xattr name prefix handling.
+  * Fix bug building file systems with compressed xattr data larger than
+    64K
+  * Add noX option to specifiy that extended attributes should not be
+    compressed
+  * *** empty log message ***
+  * Add no-xattrs option
+  * Allow comments in pseudo files
+  * Change permissions of created output filesystem image file from -
+    rwx------
+  * Update date
+
+  [ Stephen Hemminger ]
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Wed, 26 May 2010 13:20:52 -0700
+
 squashfs (4.0+vyatta-4) UNRELEASED; urgency=low
 
   * Merge in upstream (plougher) version of squashfs that
