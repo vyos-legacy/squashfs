@@ -267,11 +267,12 @@ extern pthread_mutex_t screen_mutex;
 extern int progress_enabled;
 extern int inode_number;
 extern int lookup_type[];
+extern int fd;
 
 /* unsquashfs.c */
 extern int lookup_entry(struct hash_table_entry **, long long);
-extern int read_bytes(long long, int, char *);
-extern int read_block(long long, long long *, char *);
+extern int read_fs_bytes(int fd, long long, int, void *);
+extern int read_block(int, long long, long long *, void *);
 
 /* unsquash-1.c */
 extern void read_block_list_1(unsigned int *, char *, int);

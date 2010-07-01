@@ -540,7 +540,7 @@ int lookup_entry(struct hash_table_entry *hash_table[], long long start)
 }
 
 
-int read_bytes(long long byte, int bytes, char *buff)
+int read_fs_bytes(int fd, long long byte, int bytes, void *buff)
 {
 	off_t off = byte;
 	int res, count;
@@ -572,18 +572,17 @@ int read_bytes(long long byte, int bytes, char *buff)
 }
 
 
-int read_block(long long start, long long *next, char *block)
+int read_block(int fd, long long start, long long *next, void *block)
 {
 	unsigned short c_byte;
 	int offset = 2;
 	
 	if(swap) {
-		if(read_bytes(start, 2, block) == FALSE)
+		if(read_fs_bytes(fd, start, 2, &c_byte) == FALSE)
 			goto failed;
-		((unsigned char *) &c_byte)[1] = block[0];
-		((unsigned char *) &c_byte)[0] = block[1]; 
+		c_byte = (c_byte >> 8) | ((c_byte & 0xff) << 8);
 	} else 
-		if(read_bytes(start, 2, (char *)&c_byte) == FALSE)
+		if(read_fs_bytes(fd, start, 2, &c_byte) == FALSE)
 			goto failed;
 
 	TRACE("read_block: block @0x%llx, %d %s bytes\n", start,
@@ -597,7 +596,7 @@ int read_block(long long start, long long *next, char *block)
 		int error, res;
 
 		c_byte = SQUASHFS_COMPRESSED_SIZE(c_byte);
-		if(read_bytes(start + offset, c_byte, buffer) == FALSE)
+		if(read_fs_bytes(fd, start + offset, c_byte, buffer) == FALSE)
 			goto failed;
 
 		res = comp->uncompress(block, buffer, c_byte,
@@ -613,7 +612,7 @@ int read_block(long long start, long long *next, char *block)
 		return res;
 	} else {
 		c_byte = SQUASHFS_COMPRESSED_SIZE(c_byte);
-		if(read_bytes(start + offset, c_byte, block) == FALSE)
+		if(read_fs_bytes(fd, start + offset, c_byte, block) == FALSE)
 			goto failed;
 		if(next)
 			*next = start + offset + c_byte;
@@ -636,7 +635,7 @@ int read_data_block(long long start, unsigned int size, char *block)
 		"uncompressed");
 
 	if(SQUASHFS_COMPRESSED_BLOCK(size)) {
-		if(read_bytes(start, c_byte, data) == FALSE)
+		if(read_fs_bytes(fd, start, c_byte, data) == FALSE)
 			goto failed;
 
 		res = comp->uncompress(block, data, c_byte, block_size, &error);
@@ -649,7 +648,7 @@ int read_data_block(long long start, unsigned int size, char *block)
 
 		return res;
 	} else {
-		if(read_bytes(start, c_byte, block) == FALSE)
+		if(read_fs_bytes(fd, start, c_byte, block) == FALSE)
 			goto failed;
 
 		return c_byte;
@@ -675,7 +674,7 @@ void uncompress_inode_table(long long start, long long end)
 				"in realloc\n");
 		TRACE("uncompress_inode_table: reading block 0x%llx\n", start);
 		add_entry(inode_table_hash, start, bytes);
-		res = read_block(start, &start, inode_table + bytes);
+		res = read_block(fd, start, &start, inode_table + bytes);
 		if(res == 0) {
 			free(inode_table);
 			EXIT_UNSQUASH("uncompress_inode_table: failed to read "
@@ -992,7 +991,7 @@ void uncompress_directory_table(long long start, long long end)
 		TRACE("uncompress_directory_table: reading block 0x%llx\n",
 				start);
 		add_entry(directory_table_hash, start, bytes);
-		res = read_block(start, &start, directory_table + bytes);
+		res = read_block(fd, start, &start, directory_table + bytes);
 		if(res == 0)
 			EXIT_UNSQUASH("uncompress_directory_table: failed to "
 				"read block\n");
@@ -1435,8 +1434,8 @@ int read_super(char *source)
 	/*
 	 * Try to read a Squashfs 4 superblock
 	 */
-	read_bytes(SQUASHFS_START, sizeof(squashfs_super_block),
-		(char *) &sBlk_4);
+	read_fs_bytes(fd, SQUASHFS_START, sizeof(squashfs_super_block),
+		&sBlk_4);
 	swap = sBlk_4.s_magic != SQUASHFS_MAGIC;
 	SQUASHFS_INSWAP_SUPER_BLOCK(&sBlk_4);
 
@@ -1468,8 +1467,8 @@ int read_super(char *source)
  	 * Not a Squashfs 4 superblock, try to read a squashfs 3 superblock
  	 * (compatible with 1 and 2 filesystems)
  	 */
-	read_bytes(SQUASHFS_START, sizeof(squashfs_super_block_3),
-		(char *) &sBlk_3);
+	read_fs_bytes(fd, SQUASHFS_START, sizeof(squashfs_super_block_3),
+		&sBlk_3);
 
 	/*
 	 * Check it is a SQUASHFS superblock
@@ -1587,7 +1586,7 @@ void *reader(void *arg)
 {
 	while(1) {
 		struct cache_entry *entry = queue_get(to_reader);
-		int res = read_bytes(entry->block,
+		int res = read_fs_bytes(fd, entry->block,
 			SQUASHFS_COMPRESSED_SIZE_BLOCK(entry->size),
 			entry->data);
 
@@ -1919,7 +1918,7 @@ void progress_bar(long long current, long long max, int columns)
 
 
 #define VERSION() \
-	printf("unsquashfs version 4.1-CVS (2010/03/18)\n");\
+	printf("unsquashfs version 4.1-CVS (2010/06/17)\n");\
 	printf("copyright (C) 2009 Phillip Lougher <phillip@lougher.demon.co.uk>"\
 		"\n\n");\
     	printf("This program is free software; you can redistribute it and/or\n");\
