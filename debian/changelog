@@ -1,3 +1,23 @@
+squashfs (4.1+vyatta-1) unstable; urgency=low
+
+  [ plougher ]
+  * Add support for reading xattrs in append
+  * move xattr read code into separate read_xattrs.c file
+  * add new read_xattrs.c file
+  * Rename read_destination() to read_fs_bytes().  Also don't abort on
+  * rename read_bytes() to read_fs_bytes() to be consistent with
+    mksquashfs.
+  * change read_fs_bytes() from taking char * to taking void *
+  * add external definition for get_xattrs()
+  * update date
+  * change unsquashfs read_block to take an fd
+  * Change unsquashfs read_block() to take a void * rather than a char
+    *.
+  * Refactor xattr read code so it can be used by unsquashfs
+  * Add some more comments
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Thu, 01 Jul 2010 16:09:38 -0700
+
 squashfs (4.0+vyatta-5) unstable; urgency=low
 
   [ plougher ]
