@@ -10,7 +10,8 @@ Build-Depends: cdbs (>= 0.4.23-1.1),
                docbook-xsl,
                bzip2,
                docbook-xml,
-               zlib1g-dev
+               zlib1g-dev,
+	       libattr1-dev
 Standards-Version: 3.7.3
 Homepage: http://squashfs.sourceforge.net/
 
