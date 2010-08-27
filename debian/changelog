@@ -1,3 +1,9 @@
+squashfs (4.1+vyatta-3) unstable; urgency=low
+
+  * Add build dependency on libattr1-dev
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Fri, 27 Aug 2010 14:58:13 -0700
+
 squashfs (4.1+vyatta-2) unstable; urgency=low
 
   * UNRELEASED
