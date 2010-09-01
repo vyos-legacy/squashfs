@@ -1,3 +1,9 @@
+squashfs (4.1+vyatta-4) unstable; urgency=low
+
+  * clean up build
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Tue, 31 Aug 2010 18:37:39 -0700
+
 squashfs (4.1+vyatta-3) unstable; urgency=low
 
   * Add build dependency on libattr1-dev
