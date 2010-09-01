@@ -2,23 +2,14 @@ Source: squashfs
 Section: admin
 Priority: optional
 Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
-Build-Depends: cdbs (>= 0.4.23-1.1),
-               debhelper (>= 5),
-               zlib1g-dev,
-               po4a (>= 0.21),
-               xsltproc,
-               docbook-xsl,
-               bzip2,
-               docbook-xml,
-               zlib1g-dev,
-	       libattr1-dev
+Build-Depends: cdbs (>= 0.4.23-1.1), debhelper (>= 5),
+ bzip2, zlib1g-dev, libattr1-dev
 Standards-Version: 3.7.3
 Homepage: http://squashfs.sourceforge.net/
 
 Package: squashfs-tools
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Suggests: squashfs-source
 Description: Tool to create and append to squashfs filesystems
  Squashfs is a highly compressed read-only filesystem for Linux. It uses zlib
  compression to compress both files, inodes and directories. Inodes in the

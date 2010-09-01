@@ -2,21 +2,11 @@
 # -*- mode: makefile; coding: utf-8 -*-
 
 # Common include files
-#include /usr/share/cdbs/1/rules/patchsys-quilt.mk
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/makefile.mk
 
 # Path to squashfs-tools
 DEB_STOOLS  = $(CURDIR)/squashfs-tools
-
-# Manpages stuff
-DOC_DIR	       = debian/doc
-PO_DIR	       = $(DOC_DIR)/po
-MAN_TMP_DIR    = $(DOC_DIR)/manpages
-
-MANPAGES       = $(addprefix $(DOC_DIR)/,en/mksquashfs.1 fr/mksquashfs.fr.1 en/unsquashfs.1)
-XSLT_CMD       = xsltproc -''-nonet  -''-param man.charmap.use.subset "0"
-DB2MAN         = /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/manpages/docbook.xsl
 
 # Flags to GCC
 COMP_DEFAULT = gzip
@@ -30,18 +20,6 @@ DEB_MAKE_BUILD_TARGET := all
 DEB_MAKE_CHECK_TARGET :=
 DEB_MAKE_CLEAN_TARGET :=
 
-# Squashfs-tools manpages targets
-install/squashfs-tools:: po $(MANPAGES)
-
-po:
-	mkdir -p $(dir $(MANPAGES))
-	cd $(PO_DIR) && po4a -v po4a.cfg
-
-%.1: %.dbk
-	cd $(<D) && $(XSLT_CMD) $(DB2MAN) $(<F)
-	mv $(@D)/*.1 $(DOC_DIR)/$(@F)
-
-## Squashfs-modules packages
 STAMP_CONFIG = $(CURDIR)/debian/stamp-configure
 
 # Common targets
