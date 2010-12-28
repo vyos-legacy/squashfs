@@ -1,3 +1,9 @@
+squashfs (4.1+vyatta-6) unstable; urgency=low
+
+  * new branch
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Tue, 28 Dec 2010 20:44:32 +0000
+
 squashfs (4.1+vyatta-5) unstable; urgency=low
 
   * UNRELEASED
