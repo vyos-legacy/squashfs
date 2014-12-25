@@ -1,7 +1,7 @@
 Source: squashfs
 Section: admin
 Priority: optional
-Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
+Maintainer: VyOS Package Maintainers <maintainers@vyos.net>
 Build-Depends: cdbs (>= 0.4.23-1.1), debhelper (>= 5),
  bzip2, zlib1g-dev, libattr1-dev
 Standards-Version: 3.7.3
