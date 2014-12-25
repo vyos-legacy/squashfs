@@ -1,3 +1,9 @@
+squashfs (4.1+vyos2+lithium2) unstable; urgency=low
+
+  * Update maintainer address
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Thu, 25 Dec 2014 10:00:58 +0000
+ 
 squashfs (4.1+vyos2+lithium1) unstable; urgency=low
 
   * New branch
