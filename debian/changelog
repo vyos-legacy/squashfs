@@ -1,3 +1,9 @@
+squashfs (4.1+vyos2+lithium3) unstable; urgency=low
+
+  * squashfs: add dh_gencontrol to enable development builds
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sun, 28 Jun 2015 09:11:00 +0100
+ 
 squashfs (4.1+vyos2+lithium2) unstable; urgency=low
 
   * Update maintainer address
