@@ -1,6 +1,9 @@
 #!/usr/bin/make -f
 # -*- mode: makefile; coding: utf-8 -*-
 
+DEB_DH_GENCONTROL_ARGS_ALL = $(shell if [ -f "../.VYOS_DEV_BUILD" ]; then \
+                                       echo "-- -v999.dev"; fi)
+                                       
 # Common include files
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/makefile.mk
